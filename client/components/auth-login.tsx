@@ -3,6 +3,7 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import Link from "next/link";
 import GlobalApi from "@/app/_services/GlobalApi";
 import { useRouter } from "next/navigation"; // Import useRouter
+import Image from "next/image";
 
 export default function Login() {
   type Inputs = {
@@ -31,7 +32,9 @@ export default function Login() {
 
   return (
     <div className="w-full max-w-xs">
-      <h2 className="text-3xl font-bold text-center mb-6">Tutor Buddy</h2>
+      <div className="flex justify-center mb-4">
+        <Image src={"/logo.svg"} alt="logo" width={140} height={100} />
+      </div>
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4"
