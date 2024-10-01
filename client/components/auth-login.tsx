@@ -4,11 +4,13 @@ import Link from "next/link";
 import GlobalApi from "@/app/_services/GlobalApi";
 import { useRouter } from "next/navigation"; // Import useRouter
 import Image from "next/image";
+import { jwtDecode } from "jwt-decode";
 
 export default function Login() {
   type Inputs = {
     username: string;
     password: string;
+    role: string;
   };
 
   const router = useRouter(); // Initialize the router
@@ -24,8 +26,17 @@ export default function Login() {
       if (resp.data.error) {
         alert(resp.data.error);
       } else {
-        sessionStorage.setItem("accessToken", resp.data);
-        router.push("/dashboard"); // Navigate to the dashboard after login
+        const token = resp.data.accessToken; // Assuming the JWT is in `resp.data.token`
+
+        // Decode the JWT to get the user role
+        const decoded: any = jwtDecode(token);
+        const { username, id, role } = decoded; // Assuming 'role' is a field in the JWT payload
+        // Redirect based on the decoded role
+        if (role === "teacher") {
+          router.push("/dashboard/teacher");
+        } else if (role === "student") {
+          router.push("/dashboard/student");
+        }
       }
     });
   };

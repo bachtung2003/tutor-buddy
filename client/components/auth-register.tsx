@@ -3,17 +3,18 @@ import { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import Link from "next/link";
 import GlobalApi from "@/app/_services/GlobalApi";
-import { useRouter } from "next/navigation"; // Import useRouter
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 
 export default function Register() {
   type Inputs = {
     username: string;
     password: string;
+    role: string; // Add role field
   };
 
-  const router = useRouter(); // Initialize the router
-  const [showSuccessPopup, setShowSuccessPopup] = useState(false); // State to manage the popup visibility
+  const router = useRouter();
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
 
   const {
     register,
@@ -21,30 +22,28 @@ export default function Register() {
     formState: { errors },
   } = useForm<Inputs>();
 
+  const [role, setRole] = useState(""); // Track selected role
+
   const onSubmit: SubmitHandler<Inputs> = (data) => {
-    GlobalApi.registerUser(data).then((resp) => {
+    const requestData = { ...data, role }; // Add role to the form data
+    GlobalApi.registerUser(requestData).then((resp) => {
       if (resp.data.error) {
         alert(resp.data.error);
       } else {
-        // Show the success popup
         setShowSuccessPopup(true);
       }
     });
   };
 
   const handleContinueToLogin = () => {
-    router.push("/login"); // Redirect to login page on button click
+    router.push("/login");
   };
 
   return (
     <div className="w-full max-w-xs relative">
-      {/* Success Popup */}
       {showSuccessPopup && (
         <>
-          {/* Overlay */}
           <div className="fixed inset-0 bg-black bg-opacity-50 z-10"></div>
-
-          {/* Success Popup */}
           <div className="absolute top-0 right-0 left-0 mt-4 mx-auto w-64 bg-gray-200 text-black text-center p-3 rounded shadow-lg z-20">
             <p>Registration Successful!</p>
             <button
@@ -57,7 +56,6 @@ export default function Register() {
         </>
       )}
 
-      {/* Blur Effect on Background Content */}
       <div className={showSuccessPopup ? "blur-sm" : ""}>
         <div className="flex justify-center mb-4">
           <Image src={"/logo.svg"} alt="logo" width={140} height={100} />
@@ -116,6 +114,35 @@ export default function Register() {
                 {errors.password.message}
               </span>
             )}
+          </div>
+
+          <div className="mb-6">
+            <p className="block text-gray-700 text-sm font-bold mb-2">
+              Are you a student or a teacher?
+            </p>
+            <div className="flex items-center">
+              <input
+                type="radio"
+                id="student"
+                value="student"
+                checked={role === "student"}
+                onChange={() => setRole("student")}
+                className="mr-2"
+              />
+              <label htmlFor="student" className="mr-4">
+                Student
+              </label>
+
+              <input
+                type="radio"
+                id="teacher"
+                value="teacher"
+                checked={role === "teacher"}
+                onChange={() => setRole("teacher")}
+                className="mr-2"
+              />
+              <label htmlFor="teacher">Teacher</label>
+            </div>
           </div>
 
           <div className="flex items-center justify-center">

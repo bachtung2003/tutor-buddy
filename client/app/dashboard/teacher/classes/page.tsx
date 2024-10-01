@@ -2,7 +2,7 @@
 
 import React, { useEffect } from "react";
 import AddNewClass from "./_components/AddNewClass";
-import { DataTable } from "../../../components/data-table";
+import { DataTable } from "../../../../components/data-table";
 import { columns } from "./columns";
 import { useClassContext } from "@/contexts/classes-data";
 import { ring2 } from "ldrs";
@@ -25,7 +25,16 @@ const Page = () => {
       </div>
       <div className="flex mt-8 mb-4">Class Details</div>
       {loading ? (
-        <div className="flex justify-center mt-8">loading</div>
+        <div className="flex justify-center mt-8">
+          <l-ring-2
+            size="40"
+            stroke="5"
+            stroke-length="0.25"
+            bg-opacity="0.1"
+            speed="0.8"
+            color="black"
+          ></l-ring-2>
+        </div>
       ) : (
         <DataTable columns={columns} data={classes} />
       )}

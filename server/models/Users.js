@@ -8,13 +8,11 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
+    role: {
+      type: DataTypes.STRING, // New column for role
+      allowNull: false,
+    },
   });
-
-  //   Users.associate = (models) => {
-  //     Users.hasMany(models.Classes, {
-  //       onDelete: "cascade",
-  //     });
-  //   };
 
   return Users;
 };
