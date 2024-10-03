@@ -6,9 +6,7 @@ export default function middleware(req: any) {
 
   if (!verify && url.includes("/dashboard")) {
     return NextResponse.redirect("http://localhost:3000/login");
-  }
-
-  if (
+  } else if (
     verify &&
     url === "http://localhost:3000/" &&
     url === "http://localhost:3000/login"

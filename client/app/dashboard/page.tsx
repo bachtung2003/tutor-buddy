@@ -30,8 +30,9 @@ const Dashboard = () => {
   }, [router]);
 
   return (
-    <div>
-      <div>Redirecting...</div>
+    <div className="flex justify-center items-center h-screen">
+      {/* Show a loading screen or blank page while checking the session */}
+      <div>Loading...</div>
     </div>
   );
 };

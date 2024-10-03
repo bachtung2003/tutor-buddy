@@ -1,6 +1,6 @@
 import React from "react";
-import SideNav from "../_components/SideNav";
-import Header from "../_components/Header";
+import SideNav from "../../../components/ui/sidenav-teacher";
+import Header from "../../../components/ui/header";
 
 const layout = ({
   children,

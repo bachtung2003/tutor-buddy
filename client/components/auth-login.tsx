@@ -26,17 +26,7 @@ export default function Login() {
       if (resp.data.error) {
         alert(resp.data.error);
       } else {
-        const token = resp.data.accessToken; // Assuming the JWT is in `resp.data.token`
-
-        // Decode the JWT to get the user role
-        const decoded: any = jwtDecode(token);
-        const { username, id, role } = decoded; // Assuming 'role' is a field in the JWT payload
-        // Redirect based on the decoded role
-        if (role === "teacher") {
-          router.push("/dashboard/teacher");
-        } else if (role === "student") {
-          router.push("/dashboard/student");
-        }
+        router.push("/dashboard");
       }
     });
   };
