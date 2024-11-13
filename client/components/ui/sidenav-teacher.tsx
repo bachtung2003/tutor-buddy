@@ -12,10 +12,12 @@ import {
   X,
 } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation"; // Hook to get current path
 
 const SideNav = () => {
   const [isOpen, setIsOpen] = useState(false); // For the sidebar toggle
   const [isMobile, setIsMobile] = useState(false); // Track screen size
+  const pathname = usePathname(); // Get the current path
 
   const menuList = [
     {
@@ -26,7 +28,7 @@ const SideNav = () => {
     },
     {
       id: 2,
-      name: "Classes",
+      name: "My Courses",
       icon: University,
       path: "/dashboard/teacher/classes",
     },
@@ -38,12 +40,6 @@ const SideNav = () => {
     },
     {
       id: 4,
-      name: "Attendance",
-      icon: Hand,
-      path: "/dashboard/teacher/attendance",
-    },
-    {
-      id: 5,
       name: "Settings",
       icon: Settings,
       path: "/dashboard/teacher/settings",
@@ -71,6 +67,9 @@ const SideNav = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  // Helper function to check if the path is active
+  const isActive = (menuPath: string) => pathname === menuPath;
+
   return (
     <div>
       {isMobile ? (
@@ -81,19 +80,23 @@ const SideNav = () => {
               e.stopPropagation();
               toggleMenu();
             }}
-            className="fixed top-4 left-4 z-50 p-2 bg-gray-200 rounded-lg shadow-lg"
+            className="fixed top-3 left-6 z-50 p-2 bg-white rounded-lg shadow-lg"
           >
             {isOpen ? <X /> : <Menu />}
           </button>
 
           {isOpen && (
             <div
-              className="fixed top-12 left-4 bg-white shadow-md rounded-lg p-4 w-48 z-50 transition-all duration-300"
+              className="fixed top-16 left-6 bg-white shadow-md rounded-lg p-4 w-48 z-50 transition-all duration-300"
               onClick={(e) => e.stopPropagation()}
             >
               {menuList.map((menu, index) => (
                 <Link key={index} href={menu.path} onClick={toggleMenu}>
-                  <div className="flex gap-2 mb-2 p-3 text-slate-500 hover:bg-primary hover:text-white rounded-lg cursor-pointer">
+                  <div
+                    className={`flex gap-2 mb-2 p-3 text-slate-500 hover:bg-primary hover:text-white rounded-lg cursor-pointer ${
+                      isActive(menu.path) ? "bg-primary text-white" : ""
+                    }`}
+                  >
                     <menu.icon />
                     <h2>{menu.name}</h2>
                   </div>
@@ -106,13 +109,17 @@ const SideNav = () => {
         // Desktop view: sidebar stays open on the left
         <div className="fixed top-0 left-0 h-screen w-64 p-2 bg-white shadow-md">
           <div className="flex justify-center">
-            <Image src={"/logo.svg"} alt="logo" width={140} height={100} />
+            <Image src={"/logo.svg"} alt="logo" width={100} height={100} />
           </div>
-          <hr className="my-4" />
-          <div className="mt-5 p-3">
+          <hr className="my-3" />
+          <div className="mt-3 p-3">
             {menuList.map((menu, index) => (
               <Link key={index} href={menu.path}>
-                <div className="flex gap-2 mb-2 p-3 text-slate-500 hover:bg-primary hover:text-white rounded-lg cursor-pointer">
+                <div
+                  className={`flex gap-2 mb-2 p-3 text-slate-500 hover:bg-primary hover:text-white rounded-lg cursor-pointer ${
+                    isActive(menu.path) ? "bg-primary text-white" : ""
+                  }`}
+                >
                   <menu.icon />
                   <h2>{menu.name}</h2>
                 </div>

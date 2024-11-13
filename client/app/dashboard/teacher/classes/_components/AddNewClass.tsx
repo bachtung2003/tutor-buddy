@@ -11,7 +11,8 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useClassContext } from "@/contexts/classes-data";
-import GlobalApi from "@/app/_services/GlobalApi";
+import GlobalApi from "@/services/globalApi";
+import { getSession } from "@/utils/auth";
 
 type Inputs = {
   class: string;
@@ -29,6 +30,7 @@ const AddNewClass = () => {
 
   const onSubmit: SubmitHandler<Inputs> = (data) => {
     console.log("FormClassData", data);
+    const userRole: any = getSession();
     const createDate = new Date();
     const updateDate = new Date();
     const newClass = {
@@ -36,6 +38,7 @@ const AddNewClass = () => {
       class: data.class,
       createdAt: createDate.toISOString(),
       updatedAt: updateDate.toISOString(),
+      UserId: userRole.id,
     };
 
     // Update the context with the new class

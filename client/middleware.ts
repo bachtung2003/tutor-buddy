@@ -1,16 +1,53 @@
 import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { jwtDecode } from "jwt-decode"; // Import jwt-decode correctly
 
-export default function middleware(req: any) {
-  let verify = req.cookies.get("accessToken");
-  let url = req.url;
+export function middleware(req: NextRequest) {
+  const { cookies } = req;
+  const accessToken = cookies.get("accessToken")?.value;
+  const { pathname } = req.nextUrl;
 
-  if (!verify && url.includes("/dashboard")) {
-    return NextResponse.redirect("http://localhost:3000/login");
-  } else if (
-    verify &&
-    url === "http://localhost:3000/" &&
-    url === "http://localhost:3000/login"
-  ) {
-    return NextResponse.redirect("http://localhost:3000/dashboard");
+  // Redirect logged-in users away from /login
+  if (pathname === "/login") {
+    try {
+      if (accessToken)
+        return NextResponse.redirect(new URL("/dashboard", req.url));
+    } catch {
+      return NextResponse.redirect(new URL("/login", req.url));
+    }
   }
+
+  // Redirect unauthenticated users from dashboard routes
+  if (!accessToken && pathname.includes("/dashboard")) {
+    return NextResponse.redirect(new URL("/login", req.url));
+  }
+
+  // Role-based route protection
+  if (accessToken) {
+    try {
+      const decodedToken: any = jwtDecode(accessToken);
+
+      if (
+        pathname.startsWith("/dashboard/teacher") &&
+        decodedToken?.role !== "teacher"
+      ) {
+        return NextResponse.redirect(new URL("/dashboard/student", req.url));
+      }
+
+      if (
+        pathname.startsWith("/dashboard/student") &&
+        decodedToken?.role !== "student"
+      ) {
+        return NextResponse.redirect(new URL("/dashboard/teacher", req.url));
+      }
+    } catch {
+      return NextResponse.redirect(new URL("/login", req.url));
+    }
+  }
+
+  return NextResponse.next();
 }
+
+export const config = {
+  matcher: ["/dashboard/teacher/:path*", "/dashboard/student/:path*", "/login"],
+};

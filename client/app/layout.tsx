@@ -5,7 +5,7 @@ import { ThemeProvider } from "../contexts/ThemeProvider";
 import { ClassContextProvider } from "@/contexts/classes-data";
 import { StudentContextProvider } from "@/contexts/students-data";
 
-const font = Poppins({ subsets: ["latin"], weight: "500" });
+const font = Inter({ subsets: ["latin"], weight: "500" });
 
 export const metadata: Metadata = {
   title: "Create Next App",

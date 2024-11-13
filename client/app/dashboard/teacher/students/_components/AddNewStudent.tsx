@@ -19,7 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Student, useStudentContext } from "@/contexts/students-data";
-import GlobalApi from "@/app/_services/GlobalApi";
+import GlobalApi from "@/services/globalApi";
 
 type StudentInputs = {
   name: string;
@@ -33,7 +33,7 @@ const AddNewStudent = () => {
     register,
     handleSubmit,
     setValue,
-    trigger, // Import trigger to handle validation manually
+    trigger,
     reset,
     formState: { errors },
   } = useForm<StudentInputs>();
@@ -70,7 +70,6 @@ const AddNewStudent = () => {
     };
 
     // Update students state
-
     GlobalApi.addStudent(newStudent).then((resp: any) => {
       if (resp.data.error) {
         alert(resp.data.error);
@@ -100,7 +99,7 @@ const AddNewStudent = () => {
                     placeholder="Ex. Son Tung"
                   />
                   {errors.name && (
-                    <p className="text-red-500">{errors.name.message}</p>
+                    <span className="text-red-500">{errors.name.message}</span> // Use <span> instead of <p>
                   )}
                 </div>
                 <div className="py-2">
@@ -120,7 +119,7 @@ const AddNewStudent = () => {
                     </SelectContent>
                   </Select>
                   {errors.class && (
-                    <p className="text-red-500">{errors.class.message}</p>
+                    <span className="text-red-500">{errors.class.message}</span> // Use <span>
                   )}
                 </div>
                 <div className="py-2">

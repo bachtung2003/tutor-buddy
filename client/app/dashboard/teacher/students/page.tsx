@@ -4,7 +4,7 @@ import React, { useEffect } from "react";
 import AddNewStudent from "./_components/AddNewStudent";
 import { useStudentContext } from "@/contexts/students-data";
 import { ring2 } from "ldrs";
-import { DataTable } from "@/components/data-table";
+import { DataTable } from "@/components/ui/data-table";
 import { columns } from "./columns";
 
 const Student = () => {
@@ -21,7 +21,7 @@ const Student = () => {
         Student
         <AddNewStudent />
       </div>
-      <div className="flex mt-8 mb-4">Class Details</div>
+      <div className="flex mt-8 mb-4 ">Class Details</div>
       {loading ? (
         <div className="flex justify-center mt-8">
           <l-ring-2

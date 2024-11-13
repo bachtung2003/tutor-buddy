@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import Link from "next/link";
-import GlobalApi from "@/app/_services/GlobalApi";
+import GlobalApi from "@/services/globalApi";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
@@ -149,14 +149,14 @@ export default function Register() {
             <input
               type="submit"
               value="Register"
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+              className="bg-primary hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
             />
           </div>
         </form>
 
         <p className="text-center text-gray-600 text-sm">
           Already have an account?{" "}
-          <Link href="/login" className="text-blue-500 hover:text-blue-700">
+          <Link href="/login" className="text-primary hover:text-blue-700">
             Login here
           </Link>
         </p>

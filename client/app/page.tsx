@@ -1,6 +1,6 @@
 "use client";
 import Register from "@/components/auth-register";
-import GlobalApi from "./_services/GlobalApi";
+import Cookies from "js-cookie";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation"; // Import useRouter
 
@@ -9,16 +9,10 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true); // Loading state to prevent page render
 
   useEffect(() => {
-    // Get the userRole from localStorage
-    const userRole: any = GlobalApi.getSession();
-
-    if (userRole) {
+    const token = Cookies.get("accessToken");
+    if (token) {
       // Redirect based on userRole
-      if (userRole.role === "teacher") {
-        router.replace("/dashboard/teacher");
-      } else if (userRole.role === "student") {
-        router.replace("/dashboard/student");
-      }
+      router.replace("/dashboard");
     } else {
       setIsLoading(false);
     }

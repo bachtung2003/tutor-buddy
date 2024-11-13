@@ -2,7 +2,7 @@
 import Login from "@/components/auth-login";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation"; // Import useRouter
-import GlobalApi from "@/app/_services/GlobalApi";
+import { getSession } from "@/utils/auth";
 
 export default function Home() {
   const router = useRouter();
@@ -10,7 +10,7 @@ export default function Home() {
 
   useEffect(() => {
     // Get the userRole from localStorage
-    const userRole: any = GlobalApi.getSession();
+    const userRole: any = getSession();
 
     if (userRole) {
       // Redirect based on userRole

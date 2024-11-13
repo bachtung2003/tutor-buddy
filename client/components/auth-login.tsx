@@ -1,7 +1,7 @@
 "use client";
 import { useForm, SubmitHandler } from "react-hook-form";
 import Link from "next/link";
-import GlobalApi from "@/app/_services/GlobalApi";
+import GlobalApi from "@/services/globalApi";
 import { useRouter } from "next/navigation"; // Import useRouter
 import Image from "next/image";
 import { jwtDecode } from "jwt-decode";
@@ -95,13 +95,13 @@ export default function Login() {
           <input
             type="submit"
             value="Login"
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+            className="bg-primary hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
           />
         </div>
       </form>
       <p className="text-center text-gray-600 text-sm">
         Doesn&apos;t have an account?{" "}
-        <Link href="/" className="text-blue-500 hover:text-blue-700">
+        <Link href="/" className="text-primary hover:text-blue-700">
           Register here
         </Link>
       </p>

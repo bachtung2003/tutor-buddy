@@ -1,5 +1,5 @@
 "use client";
-import GlobalApi from "@/app/_services/GlobalApi";
+import GlobalApi from "@/services/globalApi";
 import { createContext, useContext, useEffect, useState } from "react";
 
 type StudentContextProviderProps = {

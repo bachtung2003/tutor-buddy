@@ -67,7 +67,7 @@ export const columns: ColumnDef<Class>[] = [
               Copy class name
             </DropdownMenuItem>
             <DropdownMenuItem>
-              <Link href={`/dashboard/classes/${singleClass.id}`}>
+              <Link href={`/dashboard/teacher/classes/${singleClass.id}`}>
                 View class details
               </Link>
             </DropdownMenuItem>

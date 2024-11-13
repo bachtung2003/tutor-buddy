@@ -2,7 +2,7 @@
 import { useRouter } from "next/navigation"; // Import useRouter
 import { useEffect } from "react";
 import { useTheme } from "next-themes";
-import GlobalApi from "@/app/_services/GlobalApi";
+import { getSession } from "@/utils/auth";
 
 const Dashboard = () => {
   const { setTheme } = useTheme();
@@ -13,8 +13,7 @@ const Dashboard = () => {
   }, []);
 
   useEffect(() => {
-    // Get the userRole from localStorage
-    const userRole: any = GlobalApi.getSession();
+    const userRole: any = getSession();
 
     if (userRole) {
       // Redirect based on userRole
@@ -24,7 +23,7 @@ const Dashboard = () => {
         router.replace("/dashboard/student");
       }
     } else {
-      // If no role is found, perhaps redirect to login page
+      // If no role is found, redirect to login page
       router.replace("/login");
     }
   }, [router]);

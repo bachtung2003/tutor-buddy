@@ -1,17 +1,15 @@
 import React from "react";
-import GlobalApi from "@/app/_services/GlobalApi";
+import GlobalApi from "@/services/globalApi";
 import { Student } from "@/contexts/students-data";
 
 const ClassDetails = async ({ params }: { params: { id: string } }) => {
   const classDetails = await GlobalApi.getClassDetails(params.id);
-  const allStudentsInClass = await GlobalApi.getStudentDetails(params.id); // Assuming this returns a list of students
-
+  const allStudentsInClass = await GlobalApi.getStudentDetails(params.id);
   return (
     <div className="p-7">
       <div className="font-bold text-2xl flex justify-between items-center">
         Class Details
       </div>
-
       <div className="flex mt-8">
         {classDetails.data ? (
           <div>

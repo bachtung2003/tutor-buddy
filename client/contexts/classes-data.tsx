@@ -1,5 +1,5 @@
 "use client";
-import GlobalApi from "@/app/_services/GlobalApi";
+import GlobalApi from "@/services/globalApi";
 import { createContext, useContext, useEffect, useState } from "react";
 
 type ClassContextProviderProps = {
@@ -11,12 +11,14 @@ export type Class = {
   class: string;
   createdAt: string;
   updatedAt: string;
+  UserId: number;
 };
 
 type ClassContext = {
   classes: Class[]; // An array of Class objects
   setClasses: React.Dispatch<React.SetStateAction<Class[]>>;
   loading: boolean;
+  getAllClassesList: () => void;
 };
 
 const ClassContext = createContext<ClassContext | null>(null);
@@ -24,8 +26,7 @@ const ClassContext = createContext<ClassContext | null>(null);
 export function ClassContextProvider({ children }: ClassContextProviderProps) {
   const [classes, setClasses] = useState<Class[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-
-  const GetAllClassesList = () => {
+  const getAllClassesList = () => {
     setLoading(true); // Start loading
     GlobalApi.getAllClass()
       .then((resp: any) => {
@@ -36,12 +37,10 @@ export function ClassContextProvider({ children }: ClassContextProviderProps) {
       });
   };
 
-  useEffect(() => {
-    GetAllClassesList();
-  }, []);
-
   return (
-    <ClassContext.Provider value={{ classes, setClasses, loading }}>
+    <ClassContext.Provider
+      value={{ classes, setClasses, getAllClassesList, loading }}
+    >
       {children}
     </ClassContext.Provider>
   );

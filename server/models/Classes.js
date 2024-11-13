@@ -10,10 +10,12 @@ module.exports = (sequelize, DataTypes) => {
     },
   });
 
+  // Define associations
   Classes.associate = (models) => {
     Classes.hasMany(models.Students, {
       onDelete: "cascade",
     });
   };
+
   return Classes;
 };

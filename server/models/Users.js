@@ -9,10 +9,17 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
     },
     role: {
-      type: DataTypes.STRING, // New column for role
+      type: DataTypes.STRING,
       allowNull: false,
     },
   });
+
+  // Define associations
+  Users.associate = (models) => {
+    Users.hasMany(models.Classes, {
+      onDelete: "cascade",
+    });
+  };
 
   return Users;
 };
