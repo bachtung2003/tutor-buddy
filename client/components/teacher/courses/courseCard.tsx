@@ -85,7 +85,7 @@ const CourseCard: React.FC<Courses> = ({
         {/* Footer content */}
         <div className="flex justify-between items-center">
           <div className="flex gap-1">
-            <Link href={`/dashboard/student/courses/${id}`}>
+            <Link href={`/dashboard/teacher/classes/${id}`}>
               <Button className="bg-primary text-white hover:bg-blue-500">
                 View
               </Button>

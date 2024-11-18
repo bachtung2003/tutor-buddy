@@ -20,6 +20,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "../ui/button";
+import Link from "next/link";
 
 export default function TopCoursesSection() {
   return (
@@ -30,7 +31,9 @@ export default function TopCoursesSection() {
           <CardDescription>Showing top 3 most learners courses</CardDescription>
         </div>
         <div className="flex flex-col justify-center px-6 py-4 sm:px-8 sm:py-6">
-          <Button>View All</Button>
+          <Link href={"/dashboard/teacher/classes"}>
+            <Button>View All</Button>
+          </Link>
         </div>
       </CardHeader>
       <CardContent className="px-2 sm:p-6">
