@@ -20,6 +20,7 @@ import {
   AccordionContent,
 } from "@/components/ui/accordion";
 import DataTableDemo from "@/components/teacher/courses/courseDetails/student-manager";
+import Link from "next/link";
 
 type Lesson = {
   title: string;
@@ -125,7 +126,6 @@ const page = ({ params }: { params: { courseId: string } }) => {
         <section className="bg-gray-50 p-6 rounded-lg">
           <div className="flex justify-between">
             <h2 className="text-lg font-semibold mb-4">Giới thiệu khoá học</h2>
-            <Button>Edit</Button>
           </div>
           <p
             className="text-gray-700 mb-4"
@@ -139,7 +139,9 @@ const page = ({ params }: { params: { courseId: string } }) => {
         <section className="bg-gray-50 p-6 rounded-lg">
           <div className="flex justify-between">
             <h2 className="text-lg font-semibold mb-4">Nội dung khoá học</h2>
-            <Button>+ Add New Lesson</Button>
+            <Link href={`/dashboard/teacher/classes/${params.courseId}/edit`}>
+              <Button>Edit</Button>
+            </Link>
           </div>
 
           {/* Dropdown for Course Content */}
