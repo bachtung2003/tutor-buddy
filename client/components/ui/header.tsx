@@ -58,7 +58,9 @@ const Header = () => {
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => router.push("/dashboard")}>
+            <DropdownMenuItem
+              onClick={() => router.push("/dashboard/teacher/profile")}
+            >
               Account Details
             </DropdownMenuItem>
             <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>

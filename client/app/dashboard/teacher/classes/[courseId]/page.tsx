@@ -7,6 +7,7 @@ import {
   Globe,
   MonitorSmartphone,
   Star,
+  Undo2,
   Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -20,7 +21,9 @@ import {
   AccordionContent,
 } from "@/components/ui/accordion";
 import DataTableDemo from "@/components/teacher/courses/courseDetails/student-manager";
+import SheetDemo from "@/components/teacher/courses/courseDetails/edit-basic-course-info";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 type Lesson = {
   title: string;
@@ -38,6 +41,7 @@ const courseContent: Lesson[] = [
 ];
 
 const page = ({ params }: { params: { courseId: string } }) => {
+  const router = useRouter();
   const courseDetails = React.useMemo(
     () => data.find((obj) => obj.id === params.courseId),
     [params.courseId]
@@ -59,6 +63,16 @@ const page = ({ params }: { params: { courseId: string } }) => {
     <div>
       {/* Header */}
       <header className="bg-primary text-white p-8 text-left">
+        <div className="flex gap-1 items-center">
+          <Undo2 size={"15px"} />
+          <div
+            className="capitalize cursor-pointer text-white hover:underline"
+            onClick={() => router.back()}
+          >
+            Go Back
+          </div>
+        </div>
+
         <h1 className="text-3xl font-bold">Physics 3 - Fundamentals</h1>
         <div className="flex space-x-4 items-center mt-2">
           <p className="text-sm">ACCESSTRADE Academy</p>
@@ -112,9 +126,7 @@ const page = ({ params }: { params: { courseId: string } }) => {
               </li>
             </ul>
             <div className="flex gap-2">
-              <Button className="bg-primary text-white w-full">
-                Edit Course
-              </Button>
+              <SheetDemo />
               <Button className="bg-red-500 hover:bg-red-400 text-white w-full">
                 Delete Course
               </Button>
@@ -145,43 +157,6 @@ const page = ({ params }: { params: { courseId: string } }) => {
           </div>
 
           {/* Dropdown for Course Content */}
-          <Accordion type="single" collapsible>
-            <AccordionItem value="content">
-              <AccordionTrigger className="flex justify-between items-center bg-gray-100 px-4 py-2 rounded-md">
-                <div className="flex items-center gap-2">
-                  <ChevronDown className="w-5 h-5 text-gray-800" />
-                  <span className="font-semibold">Mục lục</span>
-                </div>
-                <span className="text-blue-500 text-sm">
-                  2 Bài học - 36 phút
-                </span>
-              </AccordionTrigger>
-              <AccordionContent className="pt-2">
-                {courseContent.map((lesson, index) => (
-                  <div
-                    key={index}
-                    className="flex justify-between items-center px-4 py-2 hover:bg-gray-50"
-                  >
-                    <div className="flex items-center gap-2">
-                      <PlayCircle className="w-4 h-4 text-gray-600" />
-                      <span>{lesson.title}</span>
-                    </div>
-                    <span className="text-gray-500">{lesson.duration}</span>
-                  </div>
-                ))}
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
-        </section>
-
-        {/*/ Course Assignments */}
-        <section className="bg-gray-50 p-6 rounded-lg">
-          <div className="flex justify-between">
-            <h2 className="text-lg font-semibold mb-4">Assignments</h2>
-            <Button>+ Add New Assignment</Button>
-          </div>
-
-          {/* Dropdown for Course Assignments */}
           <Accordion type="single" collapsible>
             <AccordionItem value="content">
               <AccordionTrigger className="flex justify-between items-center bg-gray-100 px-4 py-2 rounded-md">
