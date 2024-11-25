@@ -13,6 +13,15 @@ type UserData = {
   role: string;
 };
 
+type CourseData = {
+  course_id?: number;
+  title: string;
+  objective: string;
+  description: string;
+  status: string;
+  thumb_img: string;
+};
+
 const getAllClass = () => apiInstance.get("/classupdate");
 
 const addClass = (data: ClassData) => apiInstance.post("/classupdate", data);
@@ -36,6 +45,14 @@ const loginUser = (data: UserData) =>
     return resp;
   });
 
+//Courses
+const getAllCourse = () => apiInstance.get("/courseupdate");
+const addCourse = (data: CourseData) => apiInstance.post("/courseupdate", data);
+
+//Lessons
+const getAllLesson = (courseId: string) =>
+  apiInstance.get(`/lessonupdate/${courseId}`);
+
 export default {
   getAllClass,
   addClass,
@@ -45,4 +62,7 @@ export default {
   getStudentDetails,
   registerUser,
   loginUser,
+  addCourse,
+  getAllCourse,
+  getAllLesson,
 };

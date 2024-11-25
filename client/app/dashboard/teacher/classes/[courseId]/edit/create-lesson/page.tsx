@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation"; // Usage: App router
 import { Button } from "@/components/ui/button";
 
 interface FormData {
-  contentType: string;
   title: string;
   description: string;
   url: string;
@@ -27,7 +26,6 @@ const page = () => {
   const router = useRouter();
 
   const [form, setForm] = useState<FormData>({
-    contentType: "Lesson",
     title: "",
     description: "",
     url: "",
@@ -131,6 +129,27 @@ const page = () => {
     });
   };
 
+  const renderVideoPreview = (url: string) => {
+    const youtubeRegex =
+      /(?:youtube\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?/ ]{11})/;
+    const match = url.match(youtubeRegex);
+
+    if (match && match[1]) {
+      const videoId = match[1];
+      return (
+        <div className="w-full aspect-video mt-4">
+          <iframe
+            src={`https://www.youtube.com/embed/${videoId}`}
+            title="YouTube Video"
+            allowFullScreen
+            className="w-full h-full rounded-md"
+          ></iframe>
+        </div>
+      );
+    }
+    return null;
+  };
+
   const handleInputChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
@@ -216,6 +235,7 @@ const page = () => {
             placeholder="https://....."
             className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 p-2"
           />
+          {renderVideoPreview(form.url)}
         </div>
 
         <p className="block text-sm font-medium text-gray-700">Assignments</p>
@@ -284,7 +304,7 @@ const page = () => {
             onClick={addQuestion}
             className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-4 rounded-md"
           >
-            + Add assignment
+            + Add questions
           </button>
         </div>
 

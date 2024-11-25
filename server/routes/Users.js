@@ -32,13 +32,13 @@ router.post("/login", async (req, res) => {
 
     // Generate access token and refresh token
     const accessToken = sign(
-      { username: user.username, id: user.id, role: user.role },
+      { username: user.username, id: user.user_id, role: user.role },
       "importantsecret",
       { expiresIn: "15m" } // Access token valid for 15 minutes
     );
 
     const refreshToken = sign(
-      { username: user.username, id: user.id, role: user.role },
+      { username: user.username, id: user.user_id, role: user.role },
       "refreshsecret", // Use a different secret for the refresh token
       { expiresIn: "7d" } // Refresh token valid for 7 days
     );

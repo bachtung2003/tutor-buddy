@@ -2,16 +2,16 @@
 import React, { useEffect } from "react";
 import SideNav from "../../../components/ui/sidenav-teacher";
 import Header from "../../../components/ui/header";
-import { useClassContext } from "@/contexts/classes-data";
+import { useCourseContext } from "@/contexts/courses-data";
 
 const layout = ({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) => {
-  const { getAllClassesList } = useClassContext();
+  const { getAllCoursesList } = useCourseContext();
   useEffect(() => {
-    getAllClassesList();
+    getAllCoursesList();
   }, []);
   return (
     <div>

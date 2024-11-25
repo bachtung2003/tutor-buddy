@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { data } from "@/components/student/courses/demoCourses";
 import {
   CirclePlay,
@@ -24,6 +24,7 @@ import DataTableDemo from "@/components/teacher/courses/courseDetails/student-ma
 import SheetDemo from "@/components/teacher/courses/courseDetails/edit-basic-course-info";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import globalApi from "@/services/globalApi";
 
 type Lesson = {
   title: string;
@@ -41,13 +42,20 @@ const courseContent: Lesson[] = [
 ];
 
 const page = ({ params }: { params: { courseId: string } }) => {
+  useEffect(() => {
+    // Fetch courses on page load
+    globalApi.getAllLesson(params.courseId).then((resp: any) => {
+      console.log(resp.data);
+    });
+  }, []);
+
   const router = useRouter();
   const courseDetails = React.useMemo(
     () => data.find((obj) => obj.id === params.courseId),
     [params.courseId]
   );
   const [isOpen, setIsOpen] = useState(false);
-  console.log(courseDetails);
+
   const description = `Việc xây dựng hệ thống cộng tác viên khi làm Affiliate chính là 1 nguồn traffic dồi dào giúp công việc tiếp thị liên kết trở nên dễ dàng hơn bao giờ hết.
             
             Nhưng để xây dựng nên một “pháo đài” hùng mạnh như vậy liệu có dễ dàng? Mất bao lâu để chúng ta có thể hoàn thành đội quân hùng mạnh ấy?

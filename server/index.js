@@ -15,6 +15,10 @@ const studentsRouter = require("./routes/Students");
 app.use("/studentupdate", studentsRouter);
 const usersRouter = require("./routes/Users");
 app.use("/auth", usersRouter);
+const coursesRouter = require("./routes/Courses");
+app.use("/courseupdate", coursesRouter);
+const lessonsRouter = require("./routes/Lessons");
+app.use("/lessonupdate", lessonsRouter);
 
 db.sequelize.sync().then(() => {
   app.listen(port, (error) => {

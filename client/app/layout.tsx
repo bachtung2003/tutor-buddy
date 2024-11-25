@@ -2,8 +2,11 @@ import type { Metadata } from "next";
 import { Inter, Poppins } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "../contexts/ThemeProvider";
-import { ClassContextProvider } from "@/contexts/classes-data";
+import { CourseContextProvider } from "@/contexts/courses-data";
 import { StudentContextProvider } from "@/contexts/students-data";
+import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
+import { extractRouterConfig } from "uploadthing/server";
+import { ourFileRouter } from "@/app/api/uploadthing/core";
 
 const font = Inter({ subsets: ["latin"], weight: "500" });
 
@@ -26,9 +29,20 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <ClassContextProvider>
-            <StudentContextProvider>{children}</StudentContextProvider>
-          </ClassContextProvider>
+          <CourseContextProvider>
+            <StudentContextProvider>
+              <NextSSRPlugin
+                /**
+                 * The `extractRouterConfig` will extract **only** the route configs
+                 * from the router to prevent additional information from being
+                 * leaked to the client. The data passed to the client is the same
+                 * as if you were to fetch `/api/uploadthing` directly.
+                 */
+                routerConfig={extractRouterConfig(ourFileRouter)}
+              />
+              {children}
+            </StudentContextProvider>
+          </CourseContextProvider>
         </ThemeProvider>
       </body>
     </html>

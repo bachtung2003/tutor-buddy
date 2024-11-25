@@ -49,5 +49,11 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/teacher/:path*", "/dashboard/student/:path*", "/login"],
+  matcher: [
+    "/dashboard/teacher/:path*",
+    "/dashboard/student/:path*",
+    "/login",
+    // Exclude UploadThing endpoints
+    "/api/uploadthing/:path*",
+  ],
 };

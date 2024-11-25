@@ -1,54 +1,7 @@
-// "use client";
-
-// import React, { useEffect } from "react";
-// import AddNewClass from "./_components/AddNewClass";
-// import { DataTable } from "../../../../components/ui/data-table";
-// import { columns } from "./columns";
-// import { useClassContext } from "@/contexts/classes-data";
-// import { ring2 } from "ldrs";
-
-// const Page = () => {
-//   const { classes, loading } = useClassContext();
-
-//   useEffect(() => {
-//     // This code will only run in the browser
-//     if (typeof window !== "undefined") {
-//       ring2.register();
-//     }
-//   }, []);
-
-//   return (
-//     <div className="p-7 ">
-//       <div className="font-bold text-2xl flex justify-between items-center">
-//         Class
-//         <AddNewClass />
-//       </div>
-//       <div className="flex mt-8 mb-4">Class Details</div>
-//       {loading ? (
-//         <div className="flex justify-center mt-8">
-//           <l-ring-2
-//             size="40"
-//             stroke="5"
-//             stroke-length="0.25"
-//             bg-opacity="0.1"
-//             speed="0.8"
-//             color="black"
-//           ></l-ring-2>
-//         </div>
-//       ) : (
-//         <DataTable columns={columns} data={classes} />
-//       )}
-//     </div>
-//   );
-// };
-
-// export default Page;
-
 "use client";
 import CourseCard from "@/components/teacher/courses/courseCard";
-import { data, Courses } from "@/components/teacher/courses/demoCourses";
 import ItemPagination from "@/components/ui/item-pagination";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Select,
   SelectContent,
@@ -58,25 +11,37 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { useCourseContext } from "@/contexts/courses-data";
 
 const ITEMS_PER_PAGE = 6; // Number of courses per page
 
 const Page = () => {
+  const { courses, loading, getAllCoursesList } = useCourseContext();
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(6);
+
+  useEffect(() => {
+    // Fetch courses on page load
+    getAllCoursesList();
+  }, []);
+
   // Calculate the total number of pages
-  const totalPages = Math.ceil(data.length / pageSize);
+  const totalPages = Math.ceil(courses.length / pageSize);
 
   // Get the courses to display on the current page
   const getPaginatedCourses = () => {
     const startIndex = (currentPage - 1) * pageSize;
     const endIndex = startIndex + pageSize;
-    return data.slice(startIndex, endIndex);
+    return courses.slice(startIndex, endIndex);
   };
 
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
   };
+
+  if (loading) {
+    return <div>Loading...</div>; // Show a loading indicator while fetching data
+  }
 
   return (
     <div className="my-6 mx-8">
@@ -94,19 +59,15 @@ const Page = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
         {/* Course Cards */}
-        {getPaginatedCourses().map(
-          (course: Courses, index: React.Key | null | undefined) => (
-            <CourseCard
-              key={index}
-              id={course.id}
-              imageUrl={course.imageUrl}
-              title={course.title}
-              description={course.description}
-              academy={course.academy}
-              logoUrl={course.logoUrl}
-            />
-          )
-        )}
+        {getPaginatedCourses().map((course, index) => (
+          <CourseCard
+            key={index}
+            id={course.course_id.toString()}
+            title={course.title}
+            description={course.objective}
+            teacherName="Tung" // Static teacher name
+          />
+        ))}
       </div>
 
       {/* Pagination and other controls */}
