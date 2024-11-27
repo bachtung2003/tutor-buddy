@@ -5,6 +5,7 @@ import GlobalApi from "@/services/globalApi";
 import { useRouter } from "next/navigation"; // Import useRouter
 import Image from "next/image";
 import { jwtDecode } from "jwt-decode";
+import Cookies from "js-cookie"; // Import js-cookie to manage cookies
 
 export default function Login() {
   type Inputs = {
@@ -25,6 +26,8 @@ export default function Login() {
     GlobalApi.loginUser(data).then((resp) => {
       if (resp.data.error) {
         alert(resp.data.error);
+        Cookies.remove("accessToken");
+        Cookies.remove("refreshToken");
       } else {
         router.push("/dashboard");
       }

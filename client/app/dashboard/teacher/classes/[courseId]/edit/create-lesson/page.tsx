@@ -1,8 +1,10 @@
 "use client";
 import { Undo2 } from "lucide-react";
 import React, { ChangeEvent, FormEvent, useState } from "react";
-import { useRouter } from "next/navigation"; // Usage: App router
+import { useRouter, usePathname } from "next/navigation"; // Usage: App router
 import { Button } from "@/components/ui/button";
+import { Lesson, useLessonContext } from "@/contexts/lessons-data";
+import { useAssignmentContext } from "@/contexts/assignment-data";
 
 interface FormData {
   title: string;
@@ -12,6 +14,8 @@ interface FormData {
 }
 
 interface Answer {
+  answer_id: number;
+  assignment_id: number;
   text: string;
   isCorrect: boolean;
 }
@@ -24,6 +28,11 @@ interface Question {
 
 const page = () => {
   const router = useRouter();
+  const pathname = usePathname();
+  const segments = pathname.split("/");
+  const courseId = +segments[4]; // "1" is the 5th segment (index 4)
+  const { lessons, setLessons, addLesson } = useLessonContext();
+  const { addAssignment } = useAssignmentContext();
 
   const [form, setForm] = useState<FormData>({
     title: "",
@@ -84,7 +93,17 @@ const page = () => {
         q.id === questionId
           ? {
               ...q,
-              answers: [...q.answers, { text: "", isCorrect: false }],
+              answers: [
+                ...q.answers,
+                {
+                  text: "",
+                  isCorrect: false,
+                  assignment_id: questionId,
+                  answer_id: q.answers.length
+                    ? Math.max(...q.answers.map((a) => a.answer_id)) + 1
+                    : 1, // Increment based on the highest answer_id or start from 1
+                },
+              ],
             }
           : q
       ),
@@ -113,7 +132,14 @@ const page = () => {
         {
           id: prevForm.questions.length + 1, // Sequential ID
           title: "",
-          answers: [{ text: "", isCorrect: false }],
+          answers: [
+            {
+              text: "",
+              isCorrect: false,
+              assignment_id: prevForm.questions.length + 1,
+              answer_id: 1,
+            },
+          ],
         },
       ],
     }));
@@ -160,7 +186,30 @@ const page = () => {
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log("Form submitted:", form);
-    // Add your submission logic here
+    const lesson_id = lessons.length + 1;
+    const title = form.title;
+    const description = form.description;
+    const lesson_url = form.url;
+    const answer: Answer[] = form.questions.flatMap(
+      (question) => question.answers
+    );
+    const lessonBasicData = {
+      lesson_id,
+      course_id: courseId,
+      title,
+      description,
+      lesson_url,
+    };
+    addLesson(lessonBasicData);
+    const assignmentData = form.questions.map((question, index) => ({
+      assignment_id: index + 1, // Generate an ID if required by the backend
+      lesson_id,
+      title: question.title,
+      answers: question.answers,
+    }));
+    console.log(assignmentData);
+    console.log(answer);
+    addAssignment(assignmentData);
   };
 
   return (

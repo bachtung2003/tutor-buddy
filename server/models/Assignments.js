@@ -13,10 +13,20 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    content: {
-      type: DataTypes.TEXT,
-    },
   });
+
+  Assignments.associate = (models) => {
+    Assignments.hasMany(models.Answers, {
+      foreignKey: "assignment_id",
+      as: "answers",
+      onDelete: "cascade", // Deletes associated answers when assignment is deleted
+    });
+
+    Assignments.belongsTo(models.Lessons, {
+      foreignKey: "lesson_id",
+      as: "lesson",
+    });
+  };
 
   return Assignments;
 };

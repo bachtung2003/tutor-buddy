@@ -30,7 +30,6 @@ const CreateCourseForm = () => {
   const [language, setLanguage] = useState("English");
   const [objective, setObjectives] = useState("");
   const [description, setDescription] = useState("");
-
   const [status, setStatus] = useState("pending");
   const { courses, setCourses } = useCourseContext();
 

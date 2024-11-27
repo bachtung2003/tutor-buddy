@@ -5,24 +5,24 @@ const { validateToken } = require("../middlewares/AuthMiddleware");
 
 //get lesson in a course
 router.get("/:course_id", async (req, res) => {
-  const id = req.params.id;
+  const course_id = req.params.course_id;
   try {
-    const courseDetails = await Lessons.findByPk(id);
-    if (courseDetails) {
-      res.json(courseDetails);
-    } else {
-      res.json("lesson not found");
-    }
+    const lessons = await Lessons.findAll({
+      where: { course_id },
+      include: {
+        model: Assignments,
+        include: [Answers],
+      },
+    });
+    res.json(lessons);
   } catch (error) {
-    res
-      .status(500)
-      .json({ error: "An error occurred while fetching the lesson details" });
+    res.status(500).json({ error: "Error fetching lessons with answers." });
   }
 });
 
-// Add a new chapter to a course
+// Add a new lesson to a course
 router.post("/", validateToken, async (req, res) => {
-  const { course_id, title, description } = req.body;
+  const { lesson_id, course_id, title, description, lesson_url } = req.body;
 
   if (!course_id || !title) {
     return res.status(400).json({ error: "Course ID and title are required." });
@@ -30,9 +30,11 @@ router.post("/", validateToken, async (req, res) => {
 
   try {
     const newLesson = await Lessons.create({
+      lesson_id,
       course_id,
       title,
       description,
+      lesson_url,
     });
     res.status(201).json(newLesson);
   } catch (error) {
