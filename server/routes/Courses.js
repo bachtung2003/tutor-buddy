@@ -20,8 +20,8 @@ router.get("/", validateToken, async (req, res) => {
 });
 
 // Get a course by ID
-router.get("/:id", async (req, res) => {
-  const id = req.params.id;
+router.get("/:course_id", validateToken, async (req, res) => {
+  const id = req.params.course_id;
   try {
     const courseDetails = await Courses.findByPk(id);
     if (courseDetails) {
@@ -37,7 +37,7 @@ router.get("/:id", async (req, res) => {
 });
 
 // Add a new course
-router.post("/", async (req, res) => {
+router.post("/", validateToken, async (req, res) => {
   const addedCourse = req.body;
   try {
     await Courses.create(addedCourse);
@@ -46,6 +46,29 @@ router.post("/", async (req, res) => {
     res
       .status(500)
       .json({ error: "An error occurred while adding the course" });
+  }
+});
+
+// Delete a course by ID
+router.delete("/:course_id", validateToken, async (req, res) => {
+  const courseId = req.params.course_id;
+  try {
+    // Check if the course exists
+    const course = await Courses.findByPk(courseId);
+
+    if (!course) {
+      return res.status(404).json({ error: "Course not found" });
+    }
+
+    // Delete the course itself
+    await course.destroy();
+
+    res.json({ message: "Course and its related data deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ error: "An error occurred while deleting the course" });
   }
 });
 

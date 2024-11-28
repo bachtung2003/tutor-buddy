@@ -1,13 +1,19 @@
 "use client";
 import DataTableDemo from "@/components/teacher/courses/courseDetails/edit/lesson-manager";
 import { Button } from "@/components/ui/button";
+import { useLessonContext } from "@/contexts/lessons-data";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import React from "react";
+import React, { useEffect } from "react";
 
 const page = ({ params }: { params: { courseId: string } }) => {
   const courseId = params.courseId; // Replace this with dynamic courseId if needed
   const router = useRouter();
+  const { getAllLessonsList, lessons } = useLessonContext();
+  useEffect(() => {
+    // Fetch courses on page load
+    getAllLessonsList(params.courseId);
+  }, []);
 
   return (
     <div className="my-6 mx-8">
@@ -28,7 +34,7 @@ const page = ({ params }: { params: { courseId: string } }) => {
       </div>
 
       <div>
-        <DataTableDemo courseId={courseId} />
+        <DataTableDemo data={lessons} />
       </div>
       <div className="flex justify-center items-center">
         <Button onClick={() => router.back()}>Done Editing</Button>

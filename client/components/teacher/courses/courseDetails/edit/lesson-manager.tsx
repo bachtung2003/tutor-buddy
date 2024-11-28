@@ -35,14 +35,15 @@ import Link from "next/link";
 
 export type Learner = {
   title: string;
-  id: string;
-  lastModified: string;
-  status: "publish" | "draft";
-  duration: string;
-  courseId: string;
+  lesson_id?: number;
+  description: string;
+  course_id: number;
+  createdAt?: Date;
+  updatedAt?: Date;
+  lesson_url: string;
 };
 
-export default function DataTableDemo({ courseId }: { courseId: string }) {
+export default function DataTableDemo({ data }: { data: Learner[] }) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -50,40 +51,26 @@ export default function DataTableDemo({ courseId }: { courseId: string }) {
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
-
-  // Sample data, now including courseId
-  const data: Learner[] = [
-    {
-      title: "Bài học 1: Cách ứng dụng mô hình Cộng tác viên hiệu quả",
-      id: "1",
-      lastModified: "9:00 am",
-      status: "publish",
-      duration: "22:33",
-      courseId,
-    },
-    {
-      title: "Bài học 2: Cách ứng dụng mô hình Cộng tác viên hiệu quả",
-      id: "2",
-      lastModified: "9:00 am",
-      status: "publish",
-      duration: "22:33",
-      courseId,
-    },
-    // Add more lessons...
-  ];
+  let formatter = new Intl.DateTimeFormat("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
 
   const columns: ColumnDef<Learner>[] = [
     {
-      accessorKey: "id",
+      accessorKey: "lesson_id",
       header: "Id",
-      cell: ({ row }) => <div className="capitalize">{row.getValue("id")}</div>,
+      cell: ({ row }) => (
+        <div className="capitalize">{row.getValue("lesson_id")}</div>
+      ),
     },
     {
       accessorKey: "title",
       header: "Title",
       cell: ({ row }) => {
-        const lessonId = row.getValue("id"); // Get lesson ID
-        const courseId = row.original.courseId; // Ensure courseId is passed to data
+        const lessonId = row.getValue("lesson_id"); // Get lesson ID
+        const courseId = row.original.course_id; // Ensure courseId is passed to data
 
         return (
           <div className="capitalize cursor-pointer text-blue-600 hover:underline">
@@ -97,21 +84,20 @@ export default function DataTableDemo({ courseId }: { courseId: string }) {
       },
     },
     {
-      accessorKey: "status",
-      header: "Status",
-      cell: ({ row }) => (
-        <div className="capitalize">{row.getValue("status")}</div>
-      ),
+      accessorKey: "createdAt",
+      header: "Created At",
+      cell: ({ row }) => {
+        const date = row.getValue("createdAt") as string | undefined;
+        return <div>{date ? formatter.format(new Date(date)) : "N/A"}</div>;
+      },
     },
     {
-      accessorKey: "lastModified",
-      header: "Last Modified",
-      cell: ({ row }) => <div>{row.getValue("lastModified")}</div>,
-    },
-    {
-      accessorKey: "duration",
-      header: "Duration",
-      cell: ({ row }) => <div>{row.getValue("duration")}</div>,
+      accessorKey: "updatedAt",
+      header: "Updated At",
+      cell: ({ row }) => {
+        const date = row.getValue("updatedAt") as string | undefined;
+        return <div>{date ? formatter.format(new Date(date)) : "N/A"}</div>;
+      },
     },
   ];
 

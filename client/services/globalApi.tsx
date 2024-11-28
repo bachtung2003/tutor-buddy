@@ -23,11 +23,11 @@ type CourseData = {
 };
 
 type LessonData = {
-  lesson_id: number;
   course_id: number;
   title: string;
   description: string;
   lesson_url: string;
+  duration: number;
 };
 
 type AssignmentData = {
@@ -70,11 +70,14 @@ const loginUser = (data: UserData) =>
 //Courses
 const getAllCourse = () => apiInstance.get("/courseupdate");
 const addCourse = (data: CourseData) => apiInstance.post("/courseupdate", data);
+const getCourseDetails = (course_id: string) =>
+  apiInstance.get(`/courseupdate/${course_id}`);
 
 //Lessons
 const getAllLesson = (course_id: string) =>
   apiInstance.get(`/lessonupdate/${course_id}`);
-const addLesson = (data: LessonData) => apiInstance.post("/lessonupdate", data);
+const addLesson = (data: LessonData) =>
+  apiInstance.post("/lessonupdate", data).then((response) => response);
 
 //Assignments
 const getAllAssignment = (lesson_id: string) =>
@@ -107,6 +110,7 @@ export default {
   loginUser,
   addCourse,
   getAllCourse,
+  getCourseDetails,
   getAllLesson,
   addLesson,
   // getAllAnswers,

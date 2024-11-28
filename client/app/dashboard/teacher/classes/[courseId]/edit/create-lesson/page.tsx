@@ -5,12 +5,14 @@ import { useRouter, usePathname } from "next/navigation"; // Usage: App router
 import { Button } from "@/components/ui/button";
 import { Lesson, useLessonContext } from "@/contexts/lessons-data";
 import { useAssignmentContext } from "@/contexts/assignment-data";
+import axios from "axios";
 
 interface FormData {
   title: string;
   description: string;
   url: string;
   questions: Question[];
+  duration: number;
 }
 
 interface Answer {
@@ -39,6 +41,7 @@ const page = () => {
     description: "",
     url: "",
     questions: [],
+    duration: 0,
   });
 
   const handleQuestionChange = (id: number, value: string) => {
@@ -159,7 +162,6 @@ const page = () => {
     const youtubeRegex =
       /(?:youtube\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?/ ]{11})/;
     const match = url.match(youtubeRegex);
-
     if (match && match[1]) {
       const videoId = match[1];
       return (
@@ -176,6 +178,63 @@ const page = () => {
     return null;
   };
 
+  const fetchVideoDuration = async (url: string, apiKey: string) => {
+    const youtubeRegex =
+      /(?:youtube\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?/ ]{11})/;
+    const match = url.match(youtubeRegex);
+
+    if (match && match[1]) {
+      const videoId = match[1];
+
+      try {
+        const response = await axios.get(
+          `https://www.googleapis.com/youtube/v3/videos?id=${videoId}&part=contentDetails&key=${apiKey}`
+        );
+        const duration = response.data.items[0]?.contentDetails?.duration;
+
+        if (duration) {
+          // Convert ISO 8601 duration format to readable format (optional)
+          return convertISO8601ToSeconds(duration);
+        }
+      } catch (error) {
+        console.error("Error fetching video duration:", error);
+      }
+    }
+    return null;
+  };
+
+  const convertISO8601ToSeconds = (isoDuration: string) => {
+    const regex = /PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/;
+    const matches = isoDuration.match(regex);
+
+    let hours = 0;
+    let minutes = 0;
+    let seconds = 0;
+
+    if (matches) {
+      hours = matches[1] ? parseInt(matches[1]) : 0;
+      minutes = matches[2] ? parseInt(matches[2]) : 0;
+      seconds = matches[3] ? parseInt(matches[3]) : 0;
+    }
+
+    // Convert all to seconds
+    const totalSeconds = hours * 3600 + minutes * 60 + seconds;
+    return totalSeconds;
+  };
+
+  // Inside your form handler or onChange event
+  const handleUrlChange = async (url: string) => {
+    setForm((prevForm) => ({ ...prevForm, url }));
+    const apiKey = "AIzaSyAOBDw1CoixuXlhi0Jxa8gX1M1C12l-m4A"; // Replace with your API key
+    const duration = await fetchVideoDuration(url, apiKey);
+
+    if (duration) {
+      console.log("Video Duration:", duration);
+      // Update the form or UI with the video duration
+      setForm((prevForm) => ({ ...prevForm, duration }));
+    }
+  };
+
   const handleInputChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
@@ -183,33 +242,41 @@ const page = () => {
     setForm((prevForm) => ({ ...prevForm, [name]: value }));
   };
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log("Form submitted:", form);
-    const lesson_id = lessons.length + 1;
+
     const title = form.title;
     const description = form.description;
     const lesson_url = form.url;
-    const answer: Answer[] = form.questions.flatMap(
-      (question) => question.answers
-    );
+    const duration = form.duration;
+
+    // Prepare basic lesson data
     const lessonBasicData = {
-      lesson_id,
       course_id: courseId,
       title,
       description,
       lesson_url,
+      duration,
     };
-    addLesson(lessonBasicData);
+
+    // Add the lesson and retrieve the generated lesson_id
+    const newLessonId = await addLesson(lessonBasicData);
+
+    if (!newLessonId) {
+      console.error("Failed to create lesson, lesson_id is null");
+      return; // Exit if lesson creation failed
+    }
+
     const assignmentData = form.questions.map((question, index) => ({
       assignment_id: index + 1, // Generate an ID if required by the backend
-      lesson_id,
+      lesson_id: newLessonId, // Use the valid lesson_id from the server
       title: question.title,
       answers: question.answers,
     }));
-    console.log(assignmentData);
-    console.log(answer);
-    addAssignment(assignmentData);
+
+    console.log("Assignments:", assignmentData);
+    addAssignment(assignmentData); // Ensure addAssignment supports arrays
   };
 
   return (
@@ -280,7 +347,7 @@ const page = () => {
             id="url"
             name="url"
             value={form.url}
-            onChange={handleInputChange}
+            onChange={(e) => handleUrlChange(e.target.value)}
             placeholder="https://....."
             className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 p-2"
           />

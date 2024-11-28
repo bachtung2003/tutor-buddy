@@ -19,6 +19,9 @@ module.exports = (sequelize, DataTypes) => {
     lesson_url: {
       type: DataTypes.STRING,
     },
+    duration: {
+      type: DataTypes.INTEGER,
+    },
   });
 
   Lessons.associate = (models) => {

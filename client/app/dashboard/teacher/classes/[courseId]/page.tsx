@@ -25,47 +25,38 @@ import SheetDemo from "@/components/teacher/courses/courseDetails/edit-basic-cou
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import globalApi from "@/services/globalApi";
-
-type Lesson = {
-  title: string;
-  duration: string;
-};
-const courseContent: Lesson[] = [
-  {
-    title: "Bài 1: Cách ứng dụng mô hình Cộng tác viên hiệu quả",
-    duration: "22:33",
-  },
-  {
-    title: "Bài 2: Công thức xây dựng mô hình Cộng tác viên",
-    duration: "13:35",
-  },
-];
+import { useCourseContext } from "@/contexts/courses-data";
+import { useLessonContext } from "@/contexts/lessons-data";
 
 const page = ({ params }: { params: { courseId: string } }) => {
+  const { getCourseDetails, singleCourse } = useCourseContext();
+  const { getAllLessonsList, lessons } = useLessonContext();
   useEffect(() => {
+    getCourseDetails(params.courseId);
+
     // Fetch courses on page load
-    globalApi.getAllLesson(params.courseId).then((resp: any) => {
-      console.log(resp.data);
-    });
+    getAllLessonsList(params.courseId);
   }, []);
-
+  console.log(lessons);
   const router = useRouter();
-  const courseDetails = React.useMemo(
-    () => data.find((obj) => obj.id === params.courseId),
-    [params.courseId]
-  );
   const [isOpen, setIsOpen] = useState(false);
+  const totalDurationInSeconds = lessons.reduce(
+    (total, lesson) => total + lesson.duration,
+    0
+  );
+  const description = singleCourse ? singleCourse.description : "";
+  const convertSecondsToTime = (totalSeconds: number) => {
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
 
-  const description = `Việc xây dựng hệ thống cộng tác viên khi làm Affiliate chính là 1 nguồn traffic dồi dào giúp công việc tiếp thị liên kết trở nên dễ dàng hơn bao giờ hết.
-            
-            Nhưng để xây dựng nên một “pháo đài” hùng mạnh như vậy liệu có dễ dàng? Mất bao lâu để chúng ta có thể hoàn thành đội quân hùng mạnh ấy?
-            
-            Nghe có vẻ gian truân nhỉ? Nhưng thực ra dễ hơn bạn nghĩ nhiều đấy!
-            
-            Khóa học này sẽ giúp bạn hiểu rõ, làm đúng hơn, kiếm tiền nhanh hơn với việc ứng dụng mô hình Cộng tác viên trong Affiliate Marketing cùng:
-            
-            1. Top publisher sử dụng mô hình CTV trong Affiliate - Nguyễn Thành Long
-            2. Thủ lĩnh cộng đồng ACCESSTRADE - Trung Nguyễn`;
+    // Pad with leading zeros if needed
+    const hoursStr = hours.toString().padStart(2, "0");
+    const minutesStr = minutes.toString().padStart(2, "0");
+    const secondsStr = seconds.toString().padStart(2, "0");
+
+    return `${hoursStr}:${minutesStr}:${secondsStr}`;
+  };
 
   return (
     <div>
@@ -81,7 +72,7 @@ const page = ({ params }: { params: { courseId: string } }) => {
           </div>
         </div>
 
-        <h1 className="text-3xl font-bold">Physics 3 - Fundamentals</h1>
+        <h1 className="text-3xl font-bold">{singleCourse?.title}</h1>
         <div className="flex space-x-4 items-center mt-2">
           <p className="text-sm">ACCESSTRADE Academy</p>
           <div className="flex items-center space-x-1 text-sm">
@@ -104,7 +95,7 @@ const page = ({ params }: { params: { courseId: string } }) => {
         <div className="flex flex-col md:flex-row bg-gray-100 p-6 rounded-lg space-y-4 md:space-y-0 md:space-x-4">
           <div className="flex-grow">
             <Image
-              src="/course.png"
+              src={singleCourse?.thumb_img}
               alt="Course Thumbnail"
               width={400}
               height={200}
@@ -118,15 +109,16 @@ const page = ({ params }: { params: { courseId: string } }) => {
             <ul className="space-y-2 text-gray-700">
               <li className="flex gap-1">
                 <Clock4 />
-                <strong> Duration:</strong> 20 hours
+                <strong> Duration:</strong>{" "}
+                {convertSecondsToTime(totalDurationInSeconds)}
               </li>
               <li className="flex gap-1">
                 <CirclePlay />
-                <strong>Giáo trình:</strong> 10 lessons
+                <strong>Giáo trình:</strong> {lessons.length} lessons
               </li>
               <li className="flex gap-1">
                 <Globe />
-                <strong>Global</strong>
+                <strong>{singleCourse?.language}</strong>
               </li>
               <li className="flex gap-1">
                 <MonitorSmartphone />
@@ -173,11 +165,12 @@ const page = ({ params }: { params: { courseId: string } }) => {
                   <span className="font-semibold">Mục lục</span>
                 </div>
                 <span className="text-blue-500 text-sm">
-                  2 Bài học - 36 phút
+                  {lessons.length} Lessons -{" "}
+                  {convertSecondsToTime(totalDurationInSeconds)}
                 </span>
               </AccordionTrigger>
               <AccordionContent className="pt-2">
-                {courseContent.map((lesson, index) => (
+                {lessons.map((lesson, index) => (
                   <div
                     key={index}
                     className="flex justify-between items-center px-4 py-2 hover:bg-gray-50"
@@ -186,7 +179,9 @@ const page = ({ params }: { params: { courseId: string } }) => {
                       <PlayCircle className="w-4 h-4 text-gray-600" />
                       <span>{lesson.title}</span>
                     </div>
-                    <span className="text-gray-500">{lesson.duration}</span>
+                    <span className="text-gray-500">
+                      {convertSecondsToTime(lesson.duration)}
+                    </span>
                   </div>
                 ))}
               </AccordionContent>

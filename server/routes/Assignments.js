@@ -78,14 +78,14 @@ router.post("/", validateToken, async (req, res) => {
 
     res.status(201).json(createdAssignments);
   } catch (error) {
-    // // Rollback transaction on error
-    // await transaction.rollback();
-    // console.error("Error adding assignments and answers:", error.message);
-    // res.status(500).json({
-    //   error:
-    //     error.message ||
-    //     "An error occurred while adding assignments and answers.",
-    // });
+    // Rollback transaction on error
+    await transaction.rollback();
+    console.error("Error adding assignments and answers:", error.message);
+    res.status(500).json({
+      error:
+        error.message ||
+        "An error occurred while adding assignments and answers.",
+    });
     console.log(error);
   }
 });
