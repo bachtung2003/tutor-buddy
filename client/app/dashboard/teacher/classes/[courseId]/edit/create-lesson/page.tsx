@@ -28,6 +28,8 @@ interface Question {
   answers: Answer[];
 }
 
+const apiKey = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY;
+
 const page = () => {
   const router = useRouter();
   const pathname = usePathname();
@@ -35,7 +37,6 @@ const page = () => {
   const courseId = +segments[4]; // "1" is the 5th segment (index 4)
   const { lessons, setLessons, addLesson } = useLessonContext();
   const { addAssignment } = useAssignmentContext();
-
   const [form, setForm] = useState<FormData>({
     title: "",
     description: "",
@@ -225,9 +226,12 @@ const page = () => {
   // Inside your form handler or onChange event
   const handleUrlChange = async (url: string) => {
     setForm((prevForm) => ({ ...prevForm, url }));
-    const apiKey = "AIzaSyAOBDw1CoixuXlhi0Jxa8gX1M1C12l-m4A"; // Replace with your API key
+    if (!apiKey) {
+      throw new Error(
+        "API key is missing. Please set NEXT_PUBLIC_YOUTUBE_API_KEY."
+      );
+    }
     const duration = await fetchVideoDuration(url, apiKey);
-
     if (duration) {
       console.log("Video Duration:", duration);
       // Update the form or UI with the video duration
