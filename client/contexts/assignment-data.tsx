@@ -18,6 +18,7 @@ export type Assignment = {
   lesson_id: number;
   title: string;
   answers: Answer[];
+  id?: string;
 };
 
 type AssignmentContext = {
@@ -35,6 +36,7 @@ export function AssignmentContextProvider({
 }: AssignmentContextProviderProps) {
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+
   const getAllAssignmentsList = (lesson_id: string) => {
     setLoading(true); // Start loading
     GlobalApi.getAllAssignment(lesson_id)

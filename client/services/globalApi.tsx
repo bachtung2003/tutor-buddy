@@ -22,6 +22,13 @@ type CourseData = {
   thumb_img: string;
 };
 
+type StudentCourseData = {
+  student_course_id?: number;
+  student_id: number;
+  course_id: number;
+  completion_status?: boolean;
+};
+
 type LessonData = {
   course_id: number;
   title: string;
@@ -72,12 +79,31 @@ const getAllCourse = () => apiInstance.get("/courseupdate");
 const addCourse = (data: CourseData) => apiInstance.post("/courseupdate", data);
 const getCourseDetails = (course_id: string) =>
   apiInstance.get(`/courseupdate/${course_id}`);
+const updateCourse = (course_id: string, data: CourseData) =>
+  apiInstance.put(`/courseupdate/${course_id}`, data);
+const deleteCourse = (course_id: string) => {
+  return apiInstance.delete(`/courseupdate/${course_id}`);
+};
+const getTopCourse = () => apiInstance.get("/courseupdate/sorted/top-3");
+const getAllUnregisteredCourses = () =>
+  apiInstance.get("/courseupdate/unregistered/all-courses");
+
+//StudentCourses
+const getAllRegisteredCourses = () => apiInstance.get("/studentcourseupdate");
+const addStudentCourse = (data: StudentCourseData) =>
+  apiInstance.post("/studentcourseupdate", data);
+const deleteRegisteredCourse = (course_id: string) =>
+  apiInstance.delete(`/studentcourseupdate/${course_id}`);
 
 //Lessons
 const getAllLesson = (course_id: string) =>
   apiInstance.get(`/lessonupdate/${course_id}`);
 const addLesson = (data: LessonData) =>
   apiInstance.post("/lessonupdate", data).then((response) => response);
+const getSingleLesson = (lesson_id: string) =>
+  apiInstance.get(`/lessonupdate/getlesson/${lesson_id}`);
+const updateLesson = (lesson_id: string, data: LessonData) =>
+  apiInstance.put(`/lessonupdate/${lesson_id}`, data);
 
 //Assignments
 const getAllAssignment = (lesson_id: string) =>
@@ -111,8 +137,17 @@ export default {
   addCourse,
   getAllCourse,
   getCourseDetails,
+  updateCourse,
+  deleteCourse,
+  getTopCourse,
+  getAllUnregisteredCourses,
+  getAllRegisteredCourses,
+  addStudentCourse,
+  deleteRegisteredCourse,
   getAllLesson,
   addLesson,
+  getSingleLesson,
+  updateLesson,
   // getAllAnswers,
   // addAnswer,
   // updateAnswer,

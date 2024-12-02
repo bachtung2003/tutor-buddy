@@ -29,7 +29,7 @@ import { useCourseContext } from "@/contexts/courses-data";
 import { useLessonContext } from "@/contexts/lessons-data";
 
 const page = ({ params }: { params: { courseId: string } }) => {
-  const { getCourseDetails, singleCourse } = useCourseContext();
+  const { getCourseDetails, singleCourse, deleteCourse } = useCourseContext();
   const { getAllLessonsList, lessons } = useLessonContext();
   useEffect(() => {
     getCourseDetails(params.courseId);
@@ -127,7 +127,13 @@ const page = ({ params }: { params: { courseId: string } }) => {
             </ul>
             <div className="flex gap-2">
               <SheetDemo />
-              <Button className="bg-red-500 hover:bg-red-400 text-white w-full">
+              <Button
+                onClick={() => {
+                  deleteCourse(params.courseId);
+                  router.back();
+                }}
+                className="bg-red-500 hover:bg-red-400 text-white w-full"
+              >
                 Delete Course
               </Button>
             </div>
@@ -142,7 +148,7 @@ const page = ({ params }: { params: { courseId: string } }) => {
           <p
             className="text-gray-700 mb-4"
             dangerouslySetInnerHTML={{
-              __html: description.replace(/\n/g, "<br />"),
+              __html: description?.replace(/\n/g, "<br />"),
             }}
           ></p>
         </section>

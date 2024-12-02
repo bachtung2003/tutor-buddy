@@ -1,8 +1,8 @@
 "use client";
-import CourseCard from "@/components/student/courses/newCourseCard";
+import CourseCard from "@/components/student/courses/newCourses/newCourseCard";
 import { data, Courses } from "@/components/student/courses/demoCourses";
 import ItemPagination from "@/components/ui/item-pagination";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ArrowLeft } from "lucide-react"; // Import icons
 import {
   Select,
@@ -13,20 +13,26 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { useCourseContext } from "@/contexts/courses-data";
 
 const ITEMS_PER_PAGE = 6; // Number of courses per page
 
 const Page = () => {
+  const { getAllUnregisteredCourses, courses } = useCourseContext();
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(6);
   // Calculate the total number of pages
   const totalPages = Math.ceil(data.length / pageSize);
 
+  useEffect(() => {
+    getAllUnregisteredCourses();
+  }, []);
+
   // Get the courses to display on the current page
   const getPaginatedCourses = () => {
     const startIndex = (currentPage - 1) * pageSize;
     const endIndex = startIndex + pageSize;
-    return data.slice(startIndex, endIndex);
+    return courses.slice(startIndex, endIndex);
   };
 
   const handlePageChange = (newPage: number) => {
@@ -56,15 +62,13 @@ const Page = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
         {/* Course Cards */}
-        {getPaginatedCourses().map((course: Courses, index) => (
+        {getPaginatedCourses().map((course, index) => (
           <CourseCard
             key={index}
-            id={course.id}
-            imageUrl={course.imageUrl}
+            id={course.course_id.toString()}
             title={course.title}
-            description={course.description}
-            academy={course.academy}
-            logoUrl={course.logoUrl}
+            description={course.objective}
+            teacherName="Tung" // Static teacher name
           />
         ))}
       </div>

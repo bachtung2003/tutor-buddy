@@ -25,6 +25,13 @@ type CourseContext = {
   singleCourse: Course | undefined; // Allow undefined
   setSingleCourse: React.Dispatch<React.SetStateAction<Course | undefined>>; // Allow undefined
   getCourseDetails: (course_id: string) => void;
+  updateCourseInfo: (course_id: string, data: Course) => void;
+  deleteCourse: (course_id: string) => Promise<void>;
+  topCourses: Course[];
+  setTopCourses: React.Dispatch<React.SetStateAction<Course[]>>;
+  getTopCourses: () => void;
+  getAllUnregisteredCourses: () => void;
+  getRegisteredCourses: () => void;
 };
 
 const CourseContext = createContext<CourseContext | null>(null);
@@ -35,6 +42,7 @@ export function CourseContextProvider({
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [singleCourse, setSingleCourse] = useState<Course>();
+  const [topCourses, setTopCourses] = useState<Course[]>([]);
   const getAllCoursesList = () => {
     setLoading(true); // Start loading
     GlobalApi.getAllCourse()
@@ -50,6 +58,38 @@ export function CourseContextProvider({
       setSingleCourse(resp.data);
     });
   };
+  const updateCourseInfo = (course_id: string, data: Course) => {
+    GlobalApi.updateCourse(course_id, data).then((resp: any) => {
+      setSingleCourse(resp.data);
+    });
+  };
+  const deleteCourse = async (course_id: string) => {
+    try {
+      await GlobalApi.deleteCourse(course_id);
+      // Update the courses array by filtering out the deleted course
+      setCourses((prevCourses) =>
+        prevCourses.filter((course) => course.course_id !== Number(course_id))
+      );
+      console.log(`Course with id ${course_id} has been deleted.`);
+    } catch (error) {
+      console.error("Error deleting the course:", error);
+    }
+  };
+  const getTopCourses = () => {
+    GlobalApi.getTopCourse().then((resp: any) => {
+      setTopCourses(resp.data);
+    });
+  };
+  const getAllUnregisteredCourses = () => {
+    GlobalApi.getAllUnregisteredCourses().then((resp: any) => {
+      setCourses(resp.data);
+    });
+  };
+  const getRegisteredCourses = () => {
+    GlobalApi.getAllRegisteredCourses().then((resp: any) => {
+      setCourses(resp.data);
+    });
+  };
 
   return (
     <CourseContext.Provider
@@ -61,6 +101,13 @@ export function CourseContextProvider({
         singleCourse,
         setSingleCourse,
         getCourseDetails,
+        updateCourseInfo,
+        deleteCourse,
+        topCourses,
+        setTopCourses,
+        getTopCourses,
+        getAllUnregisteredCourses,
+        getRegisteredCourses,
       }}
     >
       {children}

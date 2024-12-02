@@ -23,6 +23,10 @@ type LessonContext = {
   loading: boolean;
   getAllLessonsList: (course_id: string) => void;
   addLesson: (data: Omit<Lesson, "lesson_id">) => Promise<number | null>;
+  lessonDetails: Lesson | undefined; // Allow undefined
+  setLessonDetails: React.Dispatch<React.SetStateAction<Lesson | undefined>>; // Allow undefined
+  getSingleLesson: (lesson_id: string) => void;
+  updateLesson: (lesson_id: string, data: Lesson) => void;
 };
 
 const LessonContext = createContext<LessonContext | null>(null);
@@ -32,6 +36,7 @@ export function LessonContextProvider({
 }: LessonContextProviderProps) {
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [lessonDetails, setLessonDetails] = useState<Lesson>();
 
   const getAllLessonsList = (course_id: string) => {
     setLoading(true); // Start loading
@@ -63,9 +68,31 @@ export function LessonContextProvider({
     }
   };
 
+  const getSingleLesson = (lesson_id: string) => {
+    GlobalApi.getSingleLesson(lesson_id).then((resp: any) => {
+      setLessonDetails(resp.data);
+    });
+  };
+
+  const updateLesson = (lesson_id: string, data: Lesson) => {
+    GlobalApi.updateLesson(lesson_id, data).then((resp: any) => {
+      setLessonDetails(resp.data);
+    });
+  };
+
   return (
     <LessonContext.Provider
-      value={{ lessons, setLessons, getAllLessonsList, addLesson, loading }}
+      value={{
+        lessons,
+        setLessons,
+        getAllLessonsList,
+        addLesson,
+        loading,
+        lessonDetails,
+        setLessonDetails,
+        getSingleLesson,
+        updateLesson,
+      }}
     >
       {children}
     </LessonContext.Provider>

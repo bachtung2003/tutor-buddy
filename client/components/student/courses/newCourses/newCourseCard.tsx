@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
 import { BookOpen, Layers, Palette, Circle } from "lucide-react"; // Import icons
+import SignUpCourse from "./signUpCourse";
 import { getSession } from "@/utils/auth";
 
 // Define the Courses type for the props
@@ -106,11 +107,7 @@ const CourseCard: React.FC<Courses> = ({
       {/* Footer content */}
       <div className="flex justify-between items-center">
         <div className="flex gap-2 items-center">
-          <Link href={`/dashboard/student/courses/${id}`}>
-            <Button className="bg-primary text-white hover:bg-blue-500">
-              View
-            </Button>
-          </Link>
+          <SignUpCourse course_id={id} student_id={user.id} />
           <div className="text-sm text-gray-500 flex items-center gap-1">
             <div className="inline-block w-6 h-6">
               <Circle />

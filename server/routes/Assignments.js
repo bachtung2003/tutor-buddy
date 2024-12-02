@@ -3,16 +3,36 @@ const router = express.Router();
 const { Assignments, Answers, Lessons } = require("../models");
 const { validateToken } = require("../middlewares/AuthMiddleware");
 
-//get assignments in a lesson
+// Get assignments in a lesson, including answers for each assignment
 router.get("/:lesson_id", async (req, res) => {
   const lesson_id = req.params.lesson_id;
   try {
+    // Fetch assignments for the given lesson
     const assignments = await Assignments.findAll({
       where: { lesson_id },
+      include: [
+        {
+          model: Answers,
+          as: "answers", // Assuming you have an alias 'answers' set in your model associations
+          attributes: ["text", "isCorrect"], // Only include 'text' and 'isCorrect' fields from Answers
+        },
+      ],
     });
-    res.json(assignments);
+
+    // Structure the data in the desired format
+    const result = assignments.map((assignment) => ({
+      id: assignment.assignment_id,
+      title: assignment.title,
+      answers: assignment.answers.map((answer) => ({
+        text: answer.text,
+        isCorrect: answer.isCorrect,
+      })),
+    }));
+
+    // Send the structured response
+    res.json(result);
   } catch (error) {
-    res.status(500).json({ error: "Error fetching lessons with answers." });
+    res.status(500).json({ error: "Error fetching assignments with answers." });
   }
 });
 

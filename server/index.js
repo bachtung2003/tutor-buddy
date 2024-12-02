@@ -21,6 +21,8 @@ const lessonsRouter = require("./routes/Lessons");
 app.use("/lessonupdate", lessonsRouter);
 const assignmentsRouter = require("./routes/Assignments");
 app.use("/assignmentupdate", assignmentsRouter);
+const studentCoursesRouter = require("./routes/Student_Courses");
+app.use("/studentcourseupdate", studentCoursesRouter);
 
 db.sequelize.sync().then(() => {
   app.listen(port, (error) => {

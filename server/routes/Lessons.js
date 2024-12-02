@@ -97,7 +97,7 @@ router.get("/getlesson/:lesson_id", validateToken, async (req, res) => {
     if (!lesson) {
       return res.status(404).json({ error: "Lesson not found." });
     }
-    res, json(lesson);
+    res.json(lesson);
   } catch (error) {
     console.error("Error searching for lesson:", error);
     res

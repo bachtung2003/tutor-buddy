@@ -25,6 +25,7 @@ module.exports = (sequelize, DataTypes) => {
     Assignments.belongsTo(models.Lessons, {
       foreignKey: "lesson_id",
       as: "lesson",
+      onDelete: "cascade",
     });
   };
 

@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
-import React from "react";
+import React, { useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -14,13 +14,18 @@ import {
 } from "@/components/ui/select";
 import { Globe } from "lucide-react";
 import { useState, FormEvent } from "react";
+import defaultAvatar from "@/public/default-avatar.jpg";
+import Image from "next/image";
+import { getSession } from "@/utils/auth";
+import { useCourseContext } from "@/contexts/courses-data";
+import TopCoursesSection from "@/components/teacher/profile/topCoursesSection";
 
 const page = () => {
   const [courseName, setCourseName] = useState("");
   const [language, setLanguage] = useState("English");
   const [objectives, setObjectives] = useState("");
   const [description, setDescription] = useState("");
-  const [mainPicture, setMainPicture] = useState("Scan.png");
+  const [mainPicture, setMainPicture] = useState(defaultAvatar);
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -38,6 +43,19 @@ const page = () => {
 
     // Here you can handle form submission, e.g., send data to a backend
   };
+  const [user, setUser] = useState<any>(null); // Hold user data in state
+  const { topCourses, getTopCourses } = useCourseContext();
+  useEffect(() => {
+    // Fetch user data on the client side after hydration
+    const session = getSession();
+    setUser(session); // Set the user state after fetching session data
+    getTopCourses();
+  }, []);
+
+  // Avoid rendering the username until we have user data
+  if (!user) {
+    return <div>Loading...</div>; // Optional: Loading state
+  }
   return (
     <div className="my-6 mx-8">
       {/* Page Header */}
@@ -63,64 +81,24 @@ const page = () => {
                     <label className=" font-medium">Username</label>
                   </td>
                   <td>
-                    <Input
-                      value={courseName}
-                      onChange={(e) => setCourseName(e.target.value)}
-                      placeholder="Write your course name here"
-                      className="border "
-                      required
-                    />
+                    <p>{user.username}</p>
                   </td>
                 </tr>
 
                 {/* Language */}
                 <tr>
                   <td>
-                    <label className=" font-medium">Language(s)</label>
+                    <label className=" font-medium">Role</label>
                   </td>
                   <td>
-                    <Select onValueChange={(value) => setLanguage(value)}>
-                      <SelectTrigger className="w-fit border">
-                        <Globe className="mr-2" />
-                        <SelectValue placeholder={language} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="English">English</SelectItem>
-                        <SelectItem value="French">French</SelectItem>
-                        <SelectItem value="Spanish">Spanish</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <p>{user.role}</p>
                   </td>
                 </tr>
 
                 {/* Course Objectives */}
                 <tr>
-                  <td>
-                    <label className=" font-medium">Course Objectives</label>
-                  </td>
-                  <td>
-                    <Input
-                      value={objectives}
-                      onChange={(e) => setObjectives(e.target.value)}
-                      placeholder="Write bullet points of key objectives this course covers"
-                      required
-                    />
-                  </td>
-                </tr>
-
-                {/* Course Description */}
-                <tr>
-                  <td>
-                    <label className=" font-medium">Course Description</label>
-                  </td>
-                  <td>
-                    <Textarea
-                      value={description}
-                      onChange={(e) => setDescription(e.target.value)}
-                      placeholder="This is the course details, where teachers describe the course’s target students, what it includes, what it brings to students."
-                      className="border "
-                      required
-                    />
+                  <td colSpan={2}>
+                    <TopCoursesSection courses={topCourses} />
                   </td>
                 </tr>
               </tbody>
@@ -128,20 +106,23 @@ const page = () => {
 
             {/* Right Section - Course Pictures */}
             <div className="space-y-4">
-              <h2 className="text-lg font-semibold">Course Pictures</h2>
+              <h2 className="text-lg font-semibold">Profile Pictures</h2>
 
               {/* Main Picture */}
-              <div className="flex items-center space-x-2">
-                <span className="bg-gray-100 px-4 py-2 rounded-lg text-blue-600 font-semibold">
-                  {mainPicture}
-                </span>
+              <div className="flex flex-col items-center gap-4 space-x-2">
+                <Image
+                  src={defaultAvatar}
+                  alt="default"
+                  className="rounded-full"
+                  width={200}
+                  height={200}
+                />
                 <Button
                   type="button"
                   variant="outline"
                   className="text-red-500"
-                  onClick={() => setMainPicture("")}
                 >
-                  X
+                  Edit
                 </Button>
               </div>
             </div>
