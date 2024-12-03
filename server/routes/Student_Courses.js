@@ -35,6 +35,24 @@ router.get("/", validateToken, async (req, res) => {
   }
 });
 
+// Get all courses for the authenticated user
+router.get("/get-all", validateToken, async (req, res) => {
+  try {
+    const studentId = req.user.id; // Extract student ID from the authenticated user token
+
+    // Step 1: Get all course IDs registered by the student
+    const registeredCourses = await Student_Courses.findAll({
+      where: { student_id: studentId },
+    });
+    res.json(registeredCourses); // Send the array of courses to the client
+  } catch (error) {
+    console.error("Error fetching registered courses:", error);
+    res
+      .status(500)
+      .json({ error: "An error occurred while fetching registered courses" });
+  }
+});
+
 // Get a course by ID
 router.get("/:course_id", validateToken, async (req, res) => {
   const id = req.params.course_id;

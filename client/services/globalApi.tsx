@@ -51,6 +51,14 @@ type AnswerData = {
   isCorrect: boolean;
 };
 
+type Scores = {
+  score_id?: number;
+  student_id?: number;
+  course_id: number;
+  lesson_id: number;
+  score: number;
+};
+
 const getAllClass = () => apiInstance.get("/classupdate");
 
 const addClass = (data: ClassData) => apiInstance.post("/classupdate", data);
@@ -96,6 +104,7 @@ const deleteRegisteredCourse = (course_id: string) =>
   apiInstance.delete(`/studentcourseupdate/${course_id}`);
 
 //Lessons
+const getLessons = () => apiInstance.get("/lessonupdate");
 const getAllLesson = (course_id: string) =>
   apiInstance.get(`/lessonupdate/${course_id}`);
 const addLesson = (data: LessonData) =>
@@ -111,20 +120,16 @@ const getAllAssignment = (lesson_id: string) =>
 const addAssignment = (data: AssignmentData | AssignmentData[]) => {
   // Ensure data is always treated as an array
   const assignmentsToAdd = Array.isArray(data) ? data : [data];
-
   // Send the API request for the list of assignments
   return apiInstance.post("/assignmentupdate", assignmentsToAdd);
 };
 
-// // Answers
-// const getAllAnswers = (assignmentId: string) =>
-//   apiInstance.get(`/answers/${assignmentId}`);
-// const addAnswer = (data: AnswerData) => apiInstance.post("/answers", data);
-// const updateAnswer = (answerId: string, data: Partial<AnswerData>) =>
-//   apiInstance.put(`/answers/${answerId}`, data);
-// const deleteAnswer = (answerId: string) =>
-//   apiInstance.delete(`/answers/${answerId}`);
-
+// Scores
+const getAllScores = () => apiInstance.get("/scoresupdate/all");
+const addLessonScore = (data: Scores) =>
+  apiInstance.post("/scoresupdate", data);
+const getCourseScore = (course_id: string) =>
+  apiInstance.get(`/scoresupdate/${course_id}`);
 export default {
   getAllClass,
   addClass,
@@ -144,14 +149,14 @@ export default {
   getAllRegisteredCourses,
   addStudentCourse,
   deleteRegisteredCourse,
+  getLessons,
   getAllLesson,
   addLesson,
   getSingleLesson,
   updateLesson,
-  // getAllAnswers,
-  // addAnswer,
-  // updateAnswer,
-  // deleteAnswer,
   getAllAssignment,
   addAssignment,
+  addLessonScore,
+  getCourseScore,
+  getAllScores,
 };

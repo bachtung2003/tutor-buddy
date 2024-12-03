@@ -5,11 +5,17 @@ import { Button } from "@/components/ui/button";
 import { Assignment } from "@/components/student/assignments/demoData";
 import { ArrowUpDown } from "lucide-react";
 
-export const columns: ColumnDef<Assignment>[] = [
+type Assignments = {
+  course?: string;
+  lessonTitle?: string;
+  score: number;
+  status: string;
+};
+export const columns: ColumnDef<Assignments>[] = [
   {
-    accessorKey: "title",
-    header: "Assignment Title",
-    cell: ({ row }) => <div>{row.getValue("title")}</div>,
+    accessorKey: "lessonTitle",
+    header: "Lesson Title",
+    cell: ({ row }) => <div>{row.getValue("lessonTitle")}</div>,
   },
   {
     accessorKey: "course",
@@ -48,8 +54,8 @@ export const columns: ColumnDef<Assignment>[] = [
     },
   },
   {
-    accessorKey: "grade",
-    header: "Grade",
-    cell: ({ row }) => <div className="font-bold">{row.getValue("grade")}</div>,
+    accessorKey: "score",
+    header: "Score",
+    cell: ({ row }) => <div className="font-bold">{row.getValue("score")}</div>,
   },
 ];

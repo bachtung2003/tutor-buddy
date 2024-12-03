@@ -3,8 +3,19 @@ const router = express.Router();
 const { Lessons } = require("../models");
 const { validateToken } = require("../middlewares/AuthMiddleware");
 
-//get lesson in a course
-router.get("/:course_id", async (req, res) => {
+//get all lessons
+router.get("/", validateToken, async (req, res) => {
+  try {
+    const listOfLessons = await Lessons.findAll();
+    res.json(listOfLessons);
+  } catch (error) {
+    console.log(error);
+    console.log(req.user);
+    res.status(500).json({ error: "An error occurred while fetching lessons" });
+  }
+});
+//get lessons in a course
+router.get("/:course_id", validateToken, async (req, res) => {
   const course_id = req.params.course_id;
   try {
     const lessons = await Lessons.findAll({

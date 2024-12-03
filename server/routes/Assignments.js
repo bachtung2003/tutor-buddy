@@ -21,7 +21,7 @@ router.get("/:lesson_id", async (req, res) => {
 
     // Structure the data in the desired format
     const result = assignments.map((assignment) => ({
-      id: assignment.assignment_id,
+      assignment_id: assignment.assignment_id,
       title: assignment.title,
       answers: assignment.answers.map((answer) => ({
         text: answer.text,

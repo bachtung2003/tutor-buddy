@@ -14,12 +14,11 @@ export type StudentCourses = {
 };
 
 type StudentCourseContext = {
-  signupCourse: StudentCourses | undefined;
-  setSignupCourse: React.Dispatch<
-    React.SetStateAction<StudentCourses | undefined>
-  >;
+  signupCourse: StudentCourses[];
+  setSignupCourse: React.Dispatch<React.SetStateAction<StudentCourses[]>>;
   addStudentCourse: (data: StudentCourses) => void;
-  deleteRegisteredCourse: (course_id: string) => void;
+  deleteRegisteredCourse: (course_id: string) => boolean;
+  getAllRegisteredCourses: () => void;
 };
 
 const StudentCourseContext = createContext<StudentCourseContext | null>(null);
@@ -27,7 +26,13 @@ const StudentCourseContext = createContext<StudentCourseContext | null>(null);
 export function StudentCourseContextProvider({
   children,
 }: StudentCourseContextProviderProps) {
-  const [signupCourse, setSignupCourse] = useState<StudentCourses>();
+  const [signupCourse, setSignupCourse] = useState<StudentCourses[]>([]);
+
+  const getAllRegisteredCourses = () => {
+    GlobalApi.getAllRegisteredCourses().then((resp: any) => {
+      setSignupCourse(resp.data);
+    });
+  };
 
   const addStudentCourse = (data: StudentCourses) => {
     GlobalApi.addStudentCourse(data).then((resp: any) => {
@@ -36,9 +41,15 @@ export function StudentCourseContextProvider({
   };
 
   const deleteRegisteredCourse = (course_id: string) => {
-    GlobalApi.deleteRegisteredCourse(course_id).then((resp: any) => {
-      console.log(resp.data);
-    });
+    try {
+      GlobalApi.deleteRegisteredCourse(course_id).then((resp: any) => {
+        console.log(resp.data);
+      });
+      return true;
+    } catch (error) {
+      console.error(error);
+      return false;
+    }
   };
   return (
     <StudentCourseContext.Provider
@@ -47,6 +58,7 @@ export function StudentCourseContextProvider({
         setSignupCourse,
         addStudentCourse,
         deleteRegisteredCourse,
+        getAllRegisteredCourses,
       }}
     >
       {children}

@@ -27,7 +27,8 @@ import { useLessonContext } from "@/contexts/lessons-data";
 import { useStudentCourseContext } from "@/contexts/student-courses-data";
 
 const page = ({ params }: { params: { courseId: string } }) => {
-  const { getCourseDetails, singleCourse, deleteCourse } = useCourseContext();
+  const { getCourseDetails, singleCourse, deleteCourse, getRegisteredCourses } =
+    useCourseContext();
   const { getAllLessonsList, lessons } = useLessonContext();
   const { deleteRegisteredCourse } = useStudentCourseContext();
   useEffect(() => {
@@ -126,9 +127,14 @@ const page = ({ params }: { params: { courseId: string } }) => {
             </ul>
             <div className="flex gap-2">
               <Button
-                onClick={() => {
-                  deleteRegisteredCourse(params.courseId);
-                  router.back();
+                onClick={async () => {
+                  const success = await deleteRegisteredCourse(params.courseId);
+                  if (success) {
+                    getRegisteredCourses(); // Refresh the courses list
+                    router.back();
+                  } else {
+                    console.error("Failed to delete course");
+                  }
                 }}
                 className="bg-red-500 hover:bg-red-400 text-white w-full"
               >

@@ -20,6 +20,8 @@ export type Course = {
 type CourseContext = {
   courses: Course[]; // An array of Class objects
   setCourses: React.Dispatch<React.SetStateAction<Course[]>>;
+  unregisteredCourses: Course[];
+  setUnregisteredCourses: React.Dispatch<React.SetStateAction<Course[]>>;
   loading: boolean;
   getAllCoursesList: () => void;
   singleCourse: Course | undefined; // Allow undefined
@@ -40,6 +42,7 @@ export function CourseContextProvider({
   children,
 }: CourseContextProviderProps) {
   const [courses, setCourses] = useState<Course[]>([]);
+  const [unregisteredCourses, setUnregisteredCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [singleCourse, setSingleCourse] = useState<Course>();
   const [topCourses, setTopCourses] = useState<Course[]>([]);
@@ -82,7 +85,7 @@ export function CourseContextProvider({
   };
   const getAllUnregisteredCourses = () => {
     GlobalApi.getAllUnregisteredCourses().then((resp: any) => {
-      setCourses(resp.data);
+      setUnregisteredCourses(resp.data);
     });
   };
   const getRegisteredCourses = () => {
@@ -108,6 +111,8 @@ export function CourseContextProvider({
         getTopCourses,
         getAllUnregisteredCourses,
         getRegisteredCourses,
+        unregisteredCourses,
+        setUnregisteredCourses,
       }}
     >
       {children}

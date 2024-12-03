@@ -18,6 +18,9 @@ export type Lesson = {
 };
 
 type LessonContext = {
+  allLessons: Lesson[];
+  setAllLessons: React.Dispatch<React.SetStateAction<Lesson[]>>;
+  getLessons: () => void;
   lessons: Lesson[]; // An array of Lesson objects
   setLessons: React.Dispatch<React.SetStateAction<Lesson[]>>;
   loading: boolean;
@@ -34,9 +37,16 @@ const LessonContext = createContext<LessonContext | null>(null);
 export function LessonContextProvider({
   children,
 }: LessonContextProviderProps) {
+  const [allLessons, setAllLessons] = useState<Lesson[]>([]);
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [lessonDetails, setLessonDetails] = useState<Lesson>();
+
+  const getLessons = () => {
+    GlobalApi.getLessons().then((resp: any) => {
+      setAllLessons(resp.data);
+    });
+  };
 
   const getAllLessonsList = (course_id: string) => {
     setLoading(true); // Start loading
@@ -83,6 +93,9 @@ export function LessonContextProvider({
   return (
     <LessonContext.Provider
       value={{
+        allLessons,
+        setAllLessons,
+        getLessons,
         lessons,
         setLessons,
         getAllLessonsList,

@@ -9,8 +9,8 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: "Students", // References the Students model
-        key: "id",
+        model: "Users", // References the Students model
+        key: "user_id",
       },
     },
     course_id: {
@@ -21,26 +21,22 @@ module.exports = (sequelize, DataTypes) => {
         key: "course_id",
       },
     },
-    assignment_id: {
+    lesson_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: "Assignments", // References the Assignments model
-        key: "assignment_id",
+        model: "Lessons", // References the Assignments model
+        key: "lesson_id",
       },
     },
     score: {
       type: DataTypes.FLOAT, // Stores the score of the assignment
       allowNull: false,
     },
-    is_completed: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false, // Indicates if the course is completed
-    },
   });
 
   Scores.associate = (models) => {
-    Scores.belongsTo(models.Students, {
+    Scores.belongsTo(models.Users, {
       foreignKey: "student_id",
       onDelete: "CASCADE",
     });
@@ -48,8 +44,8 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: "course_id",
       onDelete: "CASCADE",
     });
-    Scores.belongsTo(models.Assignments, {
-      foreignKey: "assignment_id",
+    Scores.belongsTo(models.Lessons, {
+      foreignKey: "lesson_id",
       onDelete: "CASCADE",
     });
   };

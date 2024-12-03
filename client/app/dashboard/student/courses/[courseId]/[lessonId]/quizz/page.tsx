@@ -1,10 +1,15 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { useAssignmentContext } from "@/contexts/assignment-data";
+import globalApi from "@/services/globalApi";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
-const Page: React.FC = () => {
+const Page = ({
+  params,
+}: {
+  params: { courseId: string; lessonId: string };
+}) => {
   const { assignments } = useAssignmentContext();
   const router = useRouter();
 
@@ -12,6 +17,7 @@ const Page: React.FC = () => {
   const [selectedAnswers, setSelectedAnswers] = useState<
     Record<number, number[]>
   >({});
+  const [currentAnswers, setCurrentAnswers] = useState<number[]>([]);
   const [score, setScore] = useState<number | null>(null);
 
   // Redirect if there are no assignments
@@ -21,33 +27,46 @@ const Page: React.FC = () => {
     }
   }, [assignments, router]);
 
-  // Reset selected answers when moving to the next question
   const handleNext = () => {
-    if (currentIndex < assignments.length - 1) {
-      setCurrentIndex((prev) => prev + 1);
-      setSelectedAnswers((prev) => ({
+    const assignmentId = assignments[currentIndex].assignment_id;
+
+    // Merge currentAnswers into selectedAnswers
+    setSelectedAnswers((prev) => {
+      const updatedAnswers = {
         ...prev,
-        [assignments[currentIndex].assignment_id]: [], // Clear answers for the current question
-      }));
-    } else {
-      calculateScore();
+        [assignmentId]: [...currentAnswers], // Preserve answers for the current question
+      };
+
+      // If it's the last assignment, calculate the score after merging
+      if (currentIndex === assignments.length - 1) {
+        calculateScore(updatedAnswers); // Pass the updated answers
+      }
+
+      return updatedAnswers;
+    });
+
+    if (currentIndex < assignments.length - 1) {
+      // Move to the next question and reset currentAnswers
+      setCurrentIndex((prev) => prev + 1);
+      setCurrentAnswers([]); // Clear answers for the next question
     }
   };
 
-  const handleAnswerSelection = (assignmentId: number, answerIndex: number) => {
-    setSelectedAnswers((prev) => ({
-      ...prev,
-      [assignmentId]: prev[assignmentId]?.includes(answerIndex)
-        ? prev[assignmentId].filter((index) => index !== answerIndex) // Deselect
-        : [...(prev[assignmentId] || []), answerIndex], // Select
-    }));
+  const handleAnswerSelection = (answerIndex: number) => {
+    setCurrentAnswers(
+      (prev) =>
+        prev.includes(answerIndex)
+          ? prev.filter((index) => index !== answerIndex) // Deselect
+          : [...prev, answerIndex] // Select
+    );
+    console.log(currentAnswers);
   };
 
-  const calculateScore = () => {
+  const calculateScore = (updatedAnswers: Record<number, number[]>) => {
     let totalScore = 0;
 
     assignments.forEach((assignment) => {
-      const selected = selectedAnswers[assignment.assignment_id] || [];
+      const selected = updatedAnswers[assignment.assignment_id] || [];
       const correctAnswers = assignment.answers
         .map((answer, index) => (answer.isCorrect ? index : null))
         .filter((index): index is number => index !== null);
@@ -61,6 +80,20 @@ const Page: React.FC = () => {
     });
 
     setScore(totalScore);
+  };
+
+  const setReturn = (score: number) => {
+    if (score) {
+      const data = {
+        course_id: parseInt(params.courseId),
+        lesson_id: parseInt(params.lessonId),
+        score: score,
+      };
+      globalApi.addLessonScore(data);
+      router.back();
+    } else {
+      router.back();
+    }
   };
 
   if (!assignments || assignments.length === 0) return null;
@@ -87,19 +120,12 @@ const Page: React.FC = () => {
               {assignments[currentIndex]?.answers.map((answer, index) => (
                 <div
                   key={index}
-                  className={` rounded-md flex justify-center items-center h-12 cursor-pointer hover:bg-primary hover:text-white ${
-                    selectedAnswers[
-                      assignments[currentIndex].assignment_id
-                    ]?.includes(index)
+                  className={`rounded-md flex justify-center items-center h-12 cursor-pointer hover:bg-primary hover:text-white ${
+                    currentAnswers.includes(index)
                       ? "bg-yellow-600 text-white"
                       : "bg-white"
                   }`}
-                  onClick={() =>
-                    handleAnswerSelection(
-                      assignments[currentIndex].assignment_id,
-                      index
-                    )
-                  }
+                  onClick={() => handleAnswerSelection(index)}
                 >
                   {answer.text}
                 </div>
@@ -115,7 +141,7 @@ const Page: React.FC = () => {
           <section className="bg-gray-50 p-6 rounded-lg text-center">
             <h2 className="text-2xl font-semibold">Your Score: {score}</h2>
             <p className="text-lg">Thank you for completing the assignments!</p>
-            <Button onClick={() => router.back()}>Return</Button>
+            <Button onClick={() => setReturn(score)}>Return</Button>
           </section>
         )}
       </main>
