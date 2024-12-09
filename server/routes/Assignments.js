@@ -3,8 +3,18 @@ const router = express.Router();
 const { Assignments, Answers, Lessons } = require("../models");
 const { validateToken } = require("../middlewares/AuthMiddleware");
 
+// Get all assignments
+router.get("/", validateToken, async (req, res) => {
+  try {
+    const listOfAssignments = await Assignments.findAll();
+    res.json(listOfAssignments);
+  } catch (error) {
+    res.status(500).json({ error: "An error occurred while fetching classes" });
+  }
+});
+
 // Get assignments in a lesson, including answers for each assignment
-router.get("/:lesson_id", async (req, res) => {
+router.get("/:lesson_id", validateToken, async (req, res) => {
   const lesson_id = req.params.lesson_id;
   try {
     // Fetch assignments for the given lesson
@@ -33,6 +43,85 @@ router.get("/:lesson_id", async (req, res) => {
     res.json(result);
   } catch (error) {
     res.status(500).json({ error: "Error fetching assignments with answers." });
+  }
+});
+
+router.put("/:lesson_id", validateToken, async (req, res) => {
+  const lesson_id = req.params.lesson_id;
+  const assignmentsToUpdate = req.body; // Expecting an array of assignments
+
+  if (!Array.isArray(assignmentsToUpdate) || assignmentsToUpdate.length === 0) {
+    return res
+      .status(400)
+      .json({ error: "Assignments array is required and cannot be empty." });
+  }
+
+  const transaction = await Assignments.sequelize.transaction();
+
+  try {
+    for (const assignmentData of assignmentsToUpdate) {
+      const { assignment_id, title, answers } = assignmentData;
+
+      // Validate input
+      if (!assignment_id || !title || !Array.isArray(answers)) {
+        throw new Error(
+          "Assignment ID, title, and a valid answers array are required."
+        );
+      }
+
+      // Check if the assignment belongs to the lesson
+      const assignment = await Assignments.findOne({
+        where: { assignment_id, lesson_id },
+        transaction,
+      });
+
+      if (!assignment) {
+        // Create a new assignment if it doesn't exist
+        const newAssignment = await Assignments.create(
+          { assignment_id, title, lesson_id },
+          { transaction }
+        );
+
+        // Add the answers for the new assignment
+        const newAnswers = answers.map((answer, index) => ({
+          ...answer,
+          answer_id: index + 1, // Generate sequential answer IDs
+          assignment_id: newAssignment.assignment_id,
+        }));
+
+        await Answers.bulkCreate(newAnswers, { transaction });
+
+        continue; // Skip the rest of the update logic for this iteration
+      }
+
+      // Update the assignment title
+      await assignment.update({ title }, { transaction });
+
+      // Replace answers: Delete old ones and insert new ones
+      await Answers.destroy({
+        where: { assignment_id },
+        transaction,
+      });
+
+      const updatedAnswers = answers.map((answer, index) => ({
+        ...answer,
+        answer_id: index + 1, // Generate sequential answer IDs
+        assignment_id,
+      }));
+
+      await Answers.bulkCreate(updatedAnswers, { transaction });
+    }
+
+    // Commit the transaction
+    await transaction.commit();
+    res.status(200).json({ message: "Assignments updated successfully." });
+  } catch (error) {
+    // Rollback on error
+    await transaction.rollback();
+    console.error("Error updating assignments:", error.message);
+    res.status(500).json({
+      error: error.message || "An error occurred while updating assignments.",
+    });
   }
 });
 
@@ -107,6 +196,58 @@ router.post("/", validateToken, async (req, res) => {
         "An error occurred while adding assignments and answers.",
     });
     console.log(error);
+  }
+});
+
+// Delete an assignment by lesson_id and assignment_id
+router.delete("/:lesson_id/:assignment_id", validateToken, async (req, res) => {
+  const lesson_id = req.params.lesson_id;
+  const assignment_id = req.params.assignment_id; // Expecting assignment_id in the request body
+
+  if (!assignment_id) {
+    return res.status(400).json({ error: "Assignment ID is required." });
+  }
+
+  const transaction = await Assignments.sequelize.transaction();
+
+  try {
+    // Check if the assignment exists for the given lesson
+    const assignment = await Assignments.findOne({
+      where: { lesson_id, assignment_id },
+      transaction,
+    });
+
+    if (!assignment) {
+      return res.status(404).json({
+        error: `Assignment with ID ${assignment_id} not found in lesson ${lesson_id}.`,
+      });
+    }
+
+    // Delete all answers associated with the assignment
+    await Answers.destroy({
+      where: { assignment_id },
+      transaction,
+    });
+
+    // Delete the assignment
+    await Assignments.destroy({
+      where: { assignment_id, lesson_id },
+      transaction,
+    });
+
+    // Commit transaction
+    await transaction.commit();
+    res.status(200).json({
+      message: `Assignment with ID ${assignment_id} deleted successfully.`,
+    });
+  } catch (error) {
+    // Rollback transaction on error
+    await transaction.rollback();
+    console.error("Error deleting assignment:", error.message);
+    res.status(500).json({
+      error:
+        error.message || "An error occurred while deleting the assignment.",
+    });
   }
 });
 

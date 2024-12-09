@@ -12,7 +12,48 @@ import ProgressCard from "./singleCardProgress";
 import { Figma } from "lucide-react";
 import { Badge } from "../ui/badge";
 
-export function Progress() {
+type CombinedData = {
+  course: string;
+  lessonTitle: string;
+  score: number;
+  status: string;
+};
+
+type CompletionPercentageProps = {
+  data: CombinedData[];
+};
+
+const Progress: React.FC<CompletionPercentageProps> = ({ data }) => {
+  const topNearlyCompletedCourses = React.useMemo(() => {
+    // Calculate completion percentage per course
+    const courseCompletion = data.reduce<
+      Record<string, { completed: number; total: number }>
+    >((acc, item) => {
+      if (!acc[item.course]) {
+        acc[item.course] = { completed: 0, total: 0 };
+      }
+      acc[item.course].total += 1;
+      if (item.status === "Submitted") {
+        acc[item.course].completed += 1;
+      }
+      return acc;
+    }, {});
+
+    const completionPercentages = Object.entries(courseCompletion).map(
+      ([course, { completed, total }]) => ({
+        course,
+        percentage: (completed / total) * 100,
+      })
+    );
+
+    // Sort courses by completion percentage in descending order
+    const sortedCourses = completionPercentages.sort(
+      (a, b) => b.percentage - a.percentage
+    );
+
+    // Return top 2 nearly completed courses
+    return sortedCourses.slice(0, 2);
+  }, [data]);
   return (
     <Card className="">
       <CardHeader>
@@ -23,22 +64,19 @@ export function Progress() {
           </Link>
         </CardTitle>
       </CardHeader>
-      <CardContent className="mx-4">
-        <div className="flex justify-between flex-col mb-4">
-          <ProgressCard
-            icon={Figma} // Use the Lucide icon
-            title="User Experience (UX) Design"
-            progressPercentage={65} // Example progress value
-          />
-        </div>
-        <div className="flex justify-between flex-col">
-          <ProgressCard
-            icon={Figma} // Use the Lucide icon
-            title="User Experience (UX) Design"
-            progressPercentage={65} // Example progress value
-          />
-        </div>
+      <CardContent className="mx-4 gap-4 flex flex-col">
+        {topNearlyCompletedCourses.map(({ course, percentage }) => (
+          <div className="flex justify-between flex-col">
+            <ProgressCard
+              icon={Figma} // Use the Lucide icon
+              title={course}
+              progressPercentage={parseInt(percentage.toPrecision())} // Example progress value
+            />
+          </div>
+        ))}
       </CardContent>
     </Card>
   );
-}
+};
+
+export default Progress;

@@ -9,7 +9,7 @@ type AssignmentContextProviderProps = {
 export type Answer = {
   text: string;
   isCorrect: boolean;
-  answer_id?: number;
+  answer_id: number;
   assignment_id: number;
 };
 
@@ -18,7 +18,6 @@ export type Assignment = {
   lesson_id: number;
   title: string;
   answers: Answer[];
-  id?: string;
 };
 
 type AssignmentContext = {
@@ -27,6 +26,11 @@ type AssignmentContext = {
   loading: boolean;
   getAllAssignmentsList: (lesson_id: string) => void;
   addAssignment: (data: Assignment[] | Assignment) => void;
+  updateAssignment: (lesson_id: string, data: Assignment[]) => void;
+  fullAssignments: Assignment[];
+  setFullAssignments: React.Dispatch<React.SetStateAction<Assignment[]>>;
+  getFullAssignment: () => void;
+  deleteAssignment: (lesson_id: string, assignment_id: string) => void;
 };
 
 const AssignmentContext = createContext<AssignmentContext | null>(null);
@@ -35,7 +39,14 @@ export function AssignmentContextProvider({
   children,
 }: AssignmentContextProviderProps) {
   const [assignments, setAssignments] = useState<Assignment[]>([]);
+  const [fullAssignments, setFullAssignments] = useState<Assignment[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+
+  const getFullAssignment = () => {
+    GlobalApi.getFullAssignment().then((resp: any) => {
+      setFullAssignments(resp.data);
+    });
+  };
 
   const getAllAssignmentsList = (lesson_id: string) => {
     setLoading(true); // Start loading
@@ -64,6 +75,25 @@ export function AssignmentContextProvider({
         setLoading(false);
       });
   };
+  const updateAssignment = (lesson_id: string, data: Assignment[]) => {
+    // Ensure data is always treated as an array
+    const assignmentsToUpdate = Array.isArray(data) ? data : [data];
+    Promise.all(
+      assignmentsToUpdate.map((assignment) =>
+        GlobalApi.updateAssignment(lesson_id, assignment)
+      )
+    )
+      .then((responses) => {
+        console.log(responses);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+
+  const deleteAssignment = (lesson_id: string, assignment_id: string) => {
+    GlobalApi.deleteAssignment(lesson_id, assignment_id);
+  };
 
   return (
     <AssignmentContext.Provider
@@ -73,6 +103,11 @@ export function AssignmentContextProvider({
         getAllAssignmentsList: getAllAssignmentsList,
         addAssignment: addAssignment,
         loading,
+        updateAssignment,
+        fullAssignments,
+        setFullAssignments,
+        getFullAssignment,
+        deleteAssignment,
       }}
     >
       {children}

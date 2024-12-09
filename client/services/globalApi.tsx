@@ -115,6 +115,9 @@ const updateLesson = (lesson_id: string, data: LessonData) =>
   apiInstance.put(`/lessonupdate/${lesson_id}`, data);
 
 //Assignments
+// Get full assignments list
+const getFullAssignment = () => apiInstance.get("/assignmentupdate");
+// Get all assignments but in a given lesson
 const getAllAssignment = (lesson_id: string) =>
   apiInstance.get(`/assignmentupdate/${lesson_id}`);
 const addAssignment = (data: AssignmentData | AssignmentData[]) => {
@@ -123,6 +126,15 @@ const addAssignment = (data: AssignmentData | AssignmentData[]) => {
   // Send the API request for the list of assignments
   return apiInstance.post("/assignmentupdate", assignmentsToAdd);
 };
+const updateAssignment = (
+  lesson_id: string,
+  data: AssignmentData | AssignmentData[]
+) => {
+  const assignmentsToUpdate = Array.isArray(data) ? data : [data];
+  return apiInstance.put(`/assignmentupdate/${lesson_id}`, assignmentsToUpdate);
+};
+const deleteAssignment = (lesson_id: string, assignment_id: string) =>
+  apiInstance.delete(`/assignmentupdate/${lesson_id}/${assignment_id}`);
 
 // Scores
 const getAllScores = () => apiInstance.get("/scoresupdate/all");
@@ -154,8 +166,11 @@ export default {
   addLesson,
   getSingleLesson,
   updateLesson,
+  getFullAssignment,
   getAllAssignment,
   addAssignment,
+  updateAssignment,
+  deleteAssignment,
   addLessonScore,
   getCourseScore,
   getAllScores,

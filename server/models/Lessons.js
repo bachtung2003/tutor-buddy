@@ -22,6 +22,10 @@ module.exports = (sequelize, DataTypes) => {
     duration: {
       type: DataTypes.INTEGER,
     },
+    status: {
+      type: DataTypes.STRING,
+      defaultValue: "Unsubmitted",
+    },
   });
 
   Lessons.associate = (models) => {

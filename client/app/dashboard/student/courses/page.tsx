@@ -1,6 +1,5 @@
 "use client";
 import CourseCard from "@/components/student/courses/courseCard";
-import { data, Courses } from "@/components/student/courses/demoCourses";
 import ItemPagination from "@/components/ui/item-pagination";
 import React, { useEffect, useState } from "react";
 import {
@@ -13,8 +12,6 @@ import {
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useCourseContext } from "@/contexts/courses-data";
-
-const ITEMS_PER_PAGE = 6; // Number of courses per page
 
 const Page = () => {
   const { getRegisteredCourses, courses } = useCourseContext();

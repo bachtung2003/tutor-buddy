@@ -1,6 +1,5 @@
 "use client";
 import CourseCard from "@/components/student/courses/newCourses/newCourseCard";
-import { data, Courses } from "@/components/student/courses/demoCourses";
 import ItemPagination from "@/components/ui/item-pagination";
 import React, { useEffect, useState } from "react";
 import { ArrowLeft } from "lucide-react"; // Import icons
@@ -11,18 +10,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useCourseContext } from "@/contexts/courses-data";
 
-const ITEMS_PER_PAGE = 6; // Number of courses per page
-
 const Page = () => {
-  const { getAllUnregisteredCourses, courses } = useCourseContext();
+  const { getAllUnregisteredCourses, unregisteredCourses } = useCourseContext();
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(6);
   // Calculate the total number of pages
-  const totalPages = Math.ceil(data.length / pageSize);
+  const totalPages = Math.ceil(unregisteredCourses.length / pageSize);
 
   useEffect(() => {
     getAllUnregisteredCourses();
@@ -32,7 +28,7 @@ const Page = () => {
   const getPaginatedCourses = () => {
     const startIndex = (currentPage - 1) * pageSize;
     const endIndex = startIndex + pageSize;
-    return courses.slice(startIndex, endIndex);
+    return unregisteredCourses.slice(startIndex, endIndex);
   };
 
   const handlePageChange = (newPage: number) => {

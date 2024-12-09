@@ -1,23 +1,18 @@
 "use client";
 import { columns } from "@/components/student/assignments/asmColumns";
 import { DataTable } from "@/components/student/assignments/data-table";
-import { data } from "@/components/student/assignments/demoData";
 import { useCourseContext } from "@/contexts/courses-data";
 import { useLessonContext } from "@/contexts/lessons-data";
 import { useScoresContext } from "@/contexts/scores-data";
 import { useStudentCourseContext } from "@/contexts/student-courses-data";
 import React, { useEffect } from "react";
 
-const page = () => {
-  const {
-    unregisteredCourses,
-    courses,
-    getAllUnregisteredCourses,
-    getRegisteredCourses,
-  } = useCourseContext();
+const Page = () => {
+  const { courses, getRegisteredCourses } = useCourseContext();
   const { allLessons, getLessons } = useLessonContext();
   const { allScores, getAllScores } = useScoresContext();
-  const { signupCourse, getAllRegisteredCourses } = useStudentCourseContext();
+  const { getAllRegisteredCourses } = useStudentCourseContext();
+
   useEffect(() => {
     getLessons();
     getRegisteredCourses();
@@ -25,30 +20,28 @@ const page = () => {
     getAllRegisteredCourses();
   }, []);
 
+  // Combine data from multiple contexts
   const combinedData = allLessons
-    .map((sign) => {
-      const course = courses.find((c) => c.course_id == sign.course_id);
-      const score = allScores.find((s) => s.course_id == sign.course_id);
-      const lesson = allLessons.find((l) => l.course_id == sign.course_id);
+    .map((lesson) => {
+      const course = courses.find((c) => c.course_id === lesson.course_id);
+      const scores = allScores.find((s) => s.lesson_id === lesson.lesson_id);
       return {
         course: course?.title,
-        lessonTitle: lesson?.title,
-        score: score ? score.score : 0,
-        status: score ? "Submitted" : "Unsubmitted",
+        lessonTitle: lesson.title,
+        score: scores ? scores.score : 0, // Assuming the first score is relevant
+        status: scores ? "Submitted" : "Unsubmitted",
       };
     })
-    .filter((data) => data.course !== undefined);
-  // Ensure that `data` is defined. If it's undefined or null, fallback to an empty array.
-  const testData = data || [];
+    .filter((entry) => entry.course !== undefined);
   console.log(combinedData);
+
   return (
     <div className="mt-6 mx-8">
       <div className="mt-5">
-        {/* Use the fallback data array */}
         <DataTable columns={columns} data={combinedData} />
       </div>
     </div>
   );
 };
 
-export default page;
+export default Page;

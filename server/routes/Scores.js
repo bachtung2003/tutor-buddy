@@ -6,7 +6,12 @@ const { validateToken } = require("../middlewares/AuthMiddleware");
 //get all scores
 router.get("/all", validateToken, async (req, res) => {
   try {
-    const listOfScores = await Scores.findAll();
+    const studentId = req.user.id; // Access the user ID from the token
+    const listOfScores = await Scores.findAll({
+      where: {
+        student_id: studentId,
+      },
+    });
     res.json(listOfScores);
   } catch (error) {
     console.log(error);

@@ -6,7 +6,13 @@ import { useLessonContext } from "@/contexts/lessons-data";
 import axios from "axios";
 import { PlayCircle, Star, Undo2, Users, Copy } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
-import React, { ChangeEvent, FormEvent, useEffect, useState } from "react";
+import React, {
+  ChangeEvent,
+  FormEvent,
+  useEffect,
+  useLayoutEffect,
+  useState,
+} from "react";
 import {
   Dialog,
   DialogClose,
@@ -29,14 +35,14 @@ interface FormData {
 }
 
 interface Answer {
-  answer_id: number;
-  assignment_id: number;
+  // answer_id: number;
+  // assignment_id: number;
   text: string;
   isCorrect: boolean;
 }
 
 interface Assignment {
-  id: number;
+  assignment_id: number;
   title: string;
   answers: Answer[];
 }
@@ -49,6 +55,25 @@ const page = ({
   params: { courseId: string; lessonId: string };
 }) => {
   const router = useRouter();
+
+  const { getCourseDetails, singleCourse } = useCourseContext();
+  const { getSingleLesson, lessonDetails, updateLesson } = useLessonContext();
+  const {
+    getAllAssignmentsList,
+    assignments,
+    updateAssignment,
+    getFullAssignment,
+    fullAssignments,
+    deleteAssignment,
+  } = useAssignmentContext();
+
+  useEffect(() => {
+    getCourseDetails(params.courseId);
+    getSingleLesson(params.lessonId);
+    getAllAssignmentsList(params.lessonId);
+  }, []);
+  console.log(assignments);
+
   const [form, setForm] = useState<FormData>({
     title: "",
     description: "",
@@ -56,131 +81,163 @@ const page = ({
     duration: 0,
     assignments: [],
   });
-
-  const { getCourseDetails, singleCourse } = useCourseContext();
-  const { getSingleLesson, lessonDetails } = useLessonContext();
-  const { getAllAssignmentsList, assignments } = useAssignmentContext();
-
+  const [tempLessonDetails, setTempLessonDetails] = useState({
+    title: "",
+    description: "",
+    lesson_url: "",
+  });
+  // Update tempLessonDetails when lessonDetails changes
   useEffect(() => {
-    getCourseDetails(params.courseId);
-    getSingleLesson(params.lessonId);
-    getAllAssignmentsList(params.lessonId);
-  }, []);
+    if (lessonDetails) {
+      setTempLessonDetails({
+        title: lessonDetails.title || "",
+        description: lessonDetails.description || "",
+        lesson_url: lessonDetails.lesson_url || "",
+      });
+    }
+  }, [lessonDetails]);
 
-  console.log(assignments);
+  const [tempAssignments, setTempAssignments] = useState<Assignment[]>([]);
+  useEffect(() => {
+    if (assignments) {
+      setTempAssignments(assignments);
+      getFullAssignment();
+    }
+  }, [assignments]);
+  console.log(tempAssignments);
+  console.log(fullAssignments);
 
-  const handleQuestionChange = (id: number, value: string) => {
-    setForm((prevForm) => ({
-      ...prevForm,
-      assignments: prevForm.assignments.map((q) =>
-        q.id === id ? { ...q, title: value } : q
-      ),
-    }));
+  const handleDeleteAssignment = (deleteIndex: number) => {
+    setTempAssignments((prevItems) => {
+      const deletedAssignment = prevItems[deleteIndex];
+      const updatedAssignments = prevItems.filter(
+        (_, index) => index !== deleteIndex
+      );
+      const assignment_id = deletedAssignment.assignment_id;
+
+      // Log or use the assignment_id of the deleted assignment
+      console.log("Deleted Assignment ID:", deletedAssignment.assignment_id);
+      deleteAssignment(params.lessonId, assignment_id.toString());
+
+      return updatedAssignments;
+    });
+  };
+
+  const handleDeleteAnswer = (assignmentIndex: number, deleteIndex: number) => {
+    setTempAssignments((prevData) =>
+      prevData.map((assignment, index) => {
+        if (index === assignmentIndex) {
+          return {
+            ...assignment,
+            answers: assignment.answers.filter((_, i) => i !== deleteIndex),
+          };
+        }
+        return assignment;
+      })
+    );
+  };
+
+  const handleQuestionTitleChange = (
+    asmIndex: number,
+    key: string,
+    newValue: string
+  ) => {
+    setTempAssignments((prevData) =>
+      prevData.map((assignment, index) => {
+        if (index === asmIndex) {
+          return {
+            ...assignment,
+            [key]: newValue,
+          };
+        }
+        return assignment;
+      })
+    );
+  };
+
+  const handleCorrectToggle = (
+    parentIndex: number,
+    childIndex: number,
+    key: string,
+    newValue: boolean
+  ) => {
+    setTempAssignments((prevData) =>
+      prevData.map((parent, pIndex) =>
+        pIndex === parentIndex
+          ? {
+              ...parent,
+              answers: parent.answers.map((child, cIndex) =>
+                cIndex === childIndex ? { ...child, [key]: newValue } : child
+              ),
+            }
+          : parent
+      )
+    );
   };
 
   const handleAnswerChange = (
-    questionId: number,
-    answerIndex: number,
-    value: string
+    parentIndex: number,
+    childIndex: number,
+    key: string,
+    newValue: string
   ) => {
-    setForm((prevForm) => ({
-      ...prevForm,
-      assignments: prevForm.assignments.map((q) =>
-        q.id === questionId
+    setTempAssignments((prevData) =>
+      prevData.map((parent, pIndex) =>
+        pIndex === parentIndex
           ? {
-              ...q,
-              answers: q.answers.map((a, index) =>
-                index === answerIndex ? { ...a, text: value } : a
+              ...parent,
+              answers: parent.answers.map((child, cIndex) =>
+                cIndex === childIndex ? { ...child, [key]: newValue } : child
               ),
             }
-          : q
-      ),
+          : parent
+      )
+    );
+  };
+
+  const handleSaveLessonDetails = () => {
+    setForm((prevForm) => ({
+      ...prevForm,
+      title: tempLessonDetails.title,
+      description: tempLessonDetails.description,
     }));
   };
 
-  const handleCorrectToggle = (questionId: number, answerIndex: number) => {
-    setForm((prevForm) => ({
-      ...prevForm,
-      assignments: prevForm.assignments.map((q) =>
-        q.id === questionId
+  const addAnswer = (questionIndex: number) => {
+    setTempAssignments((prevData) =>
+      prevData.map((parent, pIndex) =>
+        pIndex === questionIndex
           ? {
-              ...q,
-              answers: q.answers.map((a, index) =>
-                index === answerIndex ? { ...a, isCorrect: !a.isCorrect } : a
-              ),
-            }
-          : q
-      ),
-    }));
-  };
-
-  const addAnswer = (questionId: number) => {
-    setForm((prevForm) => ({
-      ...prevForm,
-      assignments: prevForm.assignments.map((q) =>
-        q.id === questionId
-          ? {
-              ...q,
+              ...parent,
               answers: [
-                ...q.answers,
+                ...parent.answers,
                 {
-                  text: "",
+                  text: "New Answer",
                   isCorrect: false,
-                  assignment_id: questionId,
-                  answer_id: q.answers.length
-                    ? Math.max(...q.answers.map((a) => a.answer_id)) + 1
-                    : 1, // Increment based on the highest answer_id or start from 1
                 },
               ],
             }
-          : q
-      ),
-    }));
-  };
-
-  const removeAnswer = (questionId: number, answerIndex: number) => {
-    setForm((prevForm) => ({
-      ...prevForm,
-      assignments: prevForm.assignments.map((q) =>
-        q.id === questionId
-          ? {
-              ...q,
-              answers: q.answers.filter((_, index) => index !== answerIndex),
-            }
-          : q
-      ),
-    }));
+          : parent
+      )
+    );
   };
 
   const addQuestion = () => {
-    setForm((prevForm) => ({
+    setTempAssignments((prevForm) => [
       ...prevForm,
-      assignments: [
-        ...prevForm.assignments,
-        {
-          id: prevForm.assignments.length + 1, // Sequential ID
-          title: "",
-          answers: [
-            {
-              text: "",
-              isCorrect: false,
-              assignment_id: prevForm.assignments.length + 1,
-              answer_id: 1,
-            },
-          ],
-        },
-      ],
-    }));
-  };
-
-  const removeQuestion = (questionId: number) => {
-    setForm((prevForm) => {
-      const updatedQuestions = prevForm.assignments
-        .filter((q) => q.id !== questionId) // Remove the question
-        .map((q, index) => ({ ...q, id: index + 1 })); // Reset IDs sequentially
-
-      return { ...prevForm, assignments: updatedQuestions };
-    });
+      {
+        assignment_id:
+          fullAssignments.length +
+          (tempAssignments.length - assignments.length + 1), // Ensure unique ID for the new question
+        title: "New Question",
+        answers: [
+          {
+            text: "New Answer",
+            isCorrect: false,
+          },
+        ],
+      },
+    ]);
   };
 
   const renderVideoPreview = (url: string) => {
@@ -247,33 +304,45 @@ const page = ({
     return totalSeconds;
   };
 
-  // Inside your form handler or onChange event
-  const handleUrlChange = async (url: string) => {
-    setForm((prevForm) => ({ ...prevForm, url }));
+  const handleSubmit = async () => {
     if (!apiKey) {
       throw new Error(
         "API key is missing. Please set NEXT_PUBLIC_YOUTUBE_API_KEY."
       );
     }
-    const duration = await fetchVideoDuration(url, apiKey);
+    const duration = await fetchVideoDuration(
+      tempLessonDetails.lesson_url,
+      apiKey
+    );
     if (duration) {
-      console.log("Video Duration:", duration);
-      // Update the form or UI with the video duration
-      setForm((prevForm) => ({ ...prevForm, duration }));
+      const lessonData = {
+        course_id: parseInt(params.courseId),
+        title: tempLessonDetails.title,
+        description: tempLessonDetails.description,
+        lesson_url: tempLessonDetails.lesson_url,
+        duration: duration,
+      };
+      updateLesson(params.lessonId, lessonData);
     }
+    const assignmentsWithLessonId = tempAssignments.map(
+      (assignment, index) => ({
+        ...assignment,
+        lesson_id: parseInt(params.lessonId),
+        answers: assignment.answers.map((answer, answerIndex) => ({
+          ...answer,
+          answer_id: answerIndex + 1,
+          assignment_id: assignment.assignment_id,
+        })),
+      })
+    );
+    console.log(assignmentsWithLessonId);
+
+    updateAssignment(params.lessonId, assignmentsWithLessonId);
   };
 
-  const handleInputChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    setForm((prevForm) => ({ ...prevForm, [name]: value }));
-  };
-
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    console.log("Form submitted:", form);
-  };
+  if (!lessonDetails || !assignments) {
+    return <div>Loading...</div>; // or a loader component
+  }
 
   return (
     <div>
@@ -312,12 +381,12 @@ const page = ({
         <section className="bg-gray-50 p-6 rounded-lg">
           <div className="flex justify-center">
             <h2 className="text-xl font-semibold mb-4">
-              {lessonDetails?.title}
+              {tempLessonDetails?.title}
             </h2>
           </div>
           <div className="flex justify-center">
             <h2 className="text-lg font-light text-justify mb-4">
-              {lessonDetails?.description}
+              {tempLessonDetails?.description}
             </h2>
           </div>
           <div className="flex justify-center gap-5">
@@ -332,45 +401,48 @@ const page = ({
                     Change lesson title and description
                   </DialogDescription>
                 </DialogHeader>
-                <div className="flex items-center space-x-2">
-                  <div className="grid flex-1 gap-2">
-                    <Label className="">Title</Label>
-                    <Input id="title" placeholder={lessonDetails?.title} />
-                  </div>
+                <div className="grid gap-4">
+                  <Label>Title</Label>
+                  <Input
+                    value={tempLessonDetails.title}
+                    onChange={(e) =>
+                      setTempLessonDetails({
+                        ...tempLessonDetails,
+                        title: e.target.value,
+                      })
+                    }
+                  />
+                  <Label>Description</Label>
+                  <textarea
+                    value={tempLessonDetails.description}
+                    onChange={(e) =>
+                      setTempLessonDetails({
+                        ...tempLessonDetails,
+                        description: e.target.value,
+                      })
+                    }
+                    rows={4}
+                    className="block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 p-2"
+                  ></textarea>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <div className="grid flex-1 gap-2">
-                    <Label htmlFor="link" className="">
-                      Description
-                    </Label>
-                    <textarea
-                      id="description"
-                      name="description"
-                      value={form.description}
-                      // onChange={handleInputChange}
-                      placeholder={lessonDetails?.description}
-                      rows={4}
-                      className="block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 p-2"
-                    ></textarea>
-                  </div>
-                </div>
-                <DialogFooter className="sm:justify-start">
+                <DialogFooter>
                   <DialogClose asChild>
-                    <Button type="button" variant="secondary">
+                    <Button type="button" onClick={handleSaveLessonDetails}>
                       Save
                     </Button>
                   </DialogClose>
                 </DialogFooter>
               </DialogContent>
             </Dialog>
-            <Button variant="outline">Undo</Button>
           </div>
         </section>
         <section className="bg-gray-50 p-6 rounded-lg">
           <div className="flex justify-center">
             <h2 className="text-xl font-semibold mb-4">Lesson Video</h2>
           </div>
-          {renderVideoPreview(lessonDetails ? lessonDetails.lesson_url : "")}
+          {renderVideoPreview(
+            tempLessonDetails ? tempLessonDetails.lesson_url : "Wrong URLs"
+          )}
           <div className="my-4 flex justify-center gap-5">
             <Dialog>
               <DialogTrigger asChild>
@@ -390,8 +462,13 @@ const page = ({
                     </Label>
                     <Input
                       id="link"
-                      defaultValue="https://ui.shadcn.com/docs/installation"
-                      readOnly
+                      defaultValue={tempLessonDetails.lesson_url}
+                      onChange={(e) =>
+                        setTempLessonDetails({
+                          ...tempLessonDetails,
+                          lesson_url: e.target.value,
+                        })
+                      }
                     />
                   </div>
                   <Button type="submit" size="sm" className="px-3">
@@ -408,7 +485,6 @@ const page = ({
                 </DialogFooter>
               </DialogContent>
             </Dialog>
-            <Button variant="outline">Undo</Button>
           </div>
         </section>
         <section className="bg-gray-50 p-6 rounded-lg">
@@ -416,15 +492,28 @@ const page = ({
             <h2 className="text-xl font-semibold">Assignments</h2>
           </div>
           <div className="flex justify-center flex-col">
-            {assignments.map((assignment, index) => (
-              <div key={index} className="space-y-4 border-b py-4 relative">
+            {tempAssignments.map((assignment, assignmentIndex) => (
+              <div
+                key={assignmentIndex}
+                className="space-y-4 border-b py-4 relative"
+              >
                 <div className="flex justify-between items-center">
                   <label className="block text-xl font-medium text-gray-700">
-                    Question {assignment.id}: {assignment.title}
+                    Question {assignmentIndex + 1}: {assignment.title}
                   </label>
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteAssignment(assignmentIndex)}
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    &times;
+                  </button>
                 </div>
                 {assignment.answers.map((answer, index) => (
-                  <div key={index} className="flex  items-center space-x-3">
+                  <div
+                    key={index}
+                    className="flex  items-center justify-between space-x-3"
+                  >
                     {answer.isCorrect ? (
                       <div className="text-primary  hover:bg-gray-50">
                         {answer.text}
@@ -432,8 +521,22 @@ const page = ({
                     ) : (
                       <div className=" hover:bg-gray-50">{answer.text}</div>
                     )}
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteAnswer(assignmentIndex, index)}
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      &times;
+                    </button>
                   </div>
                 ))}
+                <button
+                  type="button"
+                  onClick={() => addAnswer(assignmentIndex)}
+                  className="text-blue-500 hover:text-blue-700 text-sm"
+                >
+                  + Add selection
+                </button>
               </div>
             ))}
           </div>
@@ -442,53 +545,63 @@ const page = ({
               <DialogTrigger asChild>
                 <Button>Edit</Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-md">
+              <DialogContent className="sm:max-w-md max-h-[80vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>Edit</DialogTitle>
                   <DialogDescription>Change assignments</DialogDescription>
                 </DialogHeader>
                 <div className="flex justify-center flex-col">
-                  {assignments.map((assignment, index) => (
+                  {tempAssignments.map((assignment, assignmentIndex) => (
                     <div
-                      key={index}
+                      key={assignmentIndex}
                       className="space-y-4 border-b py-4 relative"
                     >
-                      <div className="flex justify-between items-center">
-                        <label className="block text-xl font-medium text-gray-700">
-                          Question {assignment.id}: {assignment.title}
+                      <div className="flex gap-6 items-center">
+                        <label className="block text-lg font-medium text-gray-700">
+                          Q{assignmentIndex + 1}:
                         </label>
-                        <button
-                          type="button"
-                          // onClick={() => removeAnswer(question.id, index)}
-                          className="text-red-500 hover:text-red-700"
-                        >
-                          &times;
-                        </button>
+                        <Input
+                          onChange={(e) =>
+                            handleQuestionTitleChange(
+                              assignmentIndex,
+                              "title",
+                              e.target.value
+                            )
+                          }
+                          value={assignment.title}
+                        ></Input>
                       </div>
                       {assignment.answers.map((answer, index) => (
                         <div
                           key={index}
-                          className="flex items-center justify-between space-x-3"
+                          className="flex items-center space-x-3"
                         >
                           <div className="flex gap-2 items-center">
                             <input
                               type="checkbox"
-                              checked={answer.isCorrect}
-                              // onChange={() =>
-                              //   handleCorrectToggle(question.id, index)
-                              // }
+                              defaultChecked={answer.isCorrect}
+                              onChange={() =>
+                                handleCorrectToggle(
+                                  assignmentIndex,
+                                  index,
+                                  "isCorrect",
+                                  !answer.isCorrect
+                                )
+                              }
                               className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                             />
-                            <div>{answer.text}</div>
+                            <Input
+                              onChange={(e) =>
+                                handleAnswerChange(
+                                  assignmentIndex,
+                                  index,
+                                  "text",
+                                  e.target.value
+                                )
+                              }
+                              value={answer.text}
+                            ></Input>
                           </div>
-
-                          <button
-                            type="button"
-                            // onClick={() => removeAnswer(question.id, index)}
-                            className="text-red-500 hover:text-red-700"
-                          >
-                            &times;
-                          </button>
                         </div>
                       ))}
                     </div>
@@ -503,12 +616,20 @@ const page = ({
                 </DialogFooter>
               </DialogContent>
             </Dialog>
-            <Button variant="outline">Undo</Button>
+            <div>
+              <button
+                type="button"
+                onClick={addQuestion}
+                className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-4 rounded-md text-sm"
+              >
+                + Add questions
+              </button>
+            </div>
           </div>
         </section>
         <section>
           <div className="flex justify-center">
-            <Button>Done</Button>
+            <Button onClick={handleSubmit}>Done</Button>
           </div>
         </section>
       </main>

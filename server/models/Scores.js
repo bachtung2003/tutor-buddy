@@ -38,15 +38,15 @@ module.exports = (sequelize, DataTypes) => {
   Scores.associate = (models) => {
     Scores.belongsTo(models.Users, {
       foreignKey: "student_id",
-      onDelete: "CASCADE",
+      onDelete: "cascade",
     });
     Scores.belongsTo(models.Courses, {
       foreignKey: "course_id",
-      onDelete: "CASCADE",
+      onDelete: "cascade",
     });
     Scores.belongsTo(models.Lessons, {
       foreignKey: "lesson_id",
-      onDelete: "CASCADE",
+      onDelete: "cascade",
     });
   };
 
