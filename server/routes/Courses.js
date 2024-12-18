@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { Courses } = require("../models");
+const { Users, Courses, Student_Courses } = require("../models");
 const { validateToken } = require("../middlewares/AuthMiddleware");
 
 // Get all courses for the authenticated user
@@ -109,10 +109,17 @@ router.get("/sorted/top-3", validateToken, async (req, res) => {
     const topCourses = await Courses.findAll({
       where: { teacher_id: userId },
       order: [["createdAt", "DESC"]],
-      limit: 3,
+      include: [
+        {
+          model: Student_Courses,
+          as: "Student", // Ensure this matches the alias used in the association
+        },
+      ],
     });
+    console.log(topCourses);
     res.json(topCourses);
   } catch (error) {
+    console.log(error);
     console.log(error);
     res
       .status(500)
@@ -123,13 +130,54 @@ router.get("/sorted/top-3", validateToken, async (req, res) => {
 // Get all courses for student to sign-up
 router.get("/unregistered/all-courses", validateToken, async (req, res) => {
   try {
-    // Assuming the Classes model has a field 'userId' that links to the user
-    const listOfCourses = await Courses.findAll();
-    res.json(listOfCourses);
+    const listOfCourses = await Courses.findAll({
+      include: [
+        {
+          model: Users,
+          as: "Teacher", // Ensure this matches the alias used in the association
+          attributes: ["username", "fullname", "profile_picture"], // Fetch only the username field
+        },
+      ],
+    });
+
+    // Map the results to include teacher.username at the top level of each course
+    const formattedCourses = listOfCourses.map((course) => {
+      return {
+        ...course.toJSON(),
+        teacher_username: course.Teacher?.username || null,
+        teacher_fullname: course.Teacher?.fullname || null,
+        teacher_profile_picture: course.Teacher?.profile_picture || null,
+      };
+    });
+
+    res.json(formattedCourses);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: "An error occurred while fetching courses." });
+  }
+});
+
+// Get top 3 courses based on created time
+router.get("/sorted/all/top-3", validateToken, async (req, res) => {
+  try {
+    // Fetch the top 3 courses for the authenticated user, ordered by createdAt descending
+    const topCourses = await Courses.findAll({
+      order: [["createdAt", "DESC"]],
+      include: [
+        {
+          model: Student_Courses,
+          as: "Student", // Ensure this matches the alias used in the association
+        },
+      ],
+    });
+    res.json(topCourses);
   } catch (error) {
     console.log(error);
-    console.log(req.user);
-    res.status(500).json({ error: "An error occurred while fetching course" });
+    console.log(error);
+    res
+      .status(500)
+      .json({ error: "An error occurred while fetching top courses" });
   }
 });
 

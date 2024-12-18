@@ -38,12 +38,6 @@ const SideNav = () => {
       icon: GraduationCap,
       path: "/dashboard/teacher/students",
     },
-    {
-      id: 4,
-      name: "Settings",
-      icon: Settings,
-      path: "/dashboard/teacher/settings",
-    },
   ];
 
   const toggleMenu = () => {

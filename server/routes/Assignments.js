@@ -218,9 +218,9 @@ router.delete("/:lesson_id/:assignment_id", validateToken, async (req, res) => {
     });
 
     if (!assignment) {
-      return res.status(404).json({
-        error: `Assignment with ID ${assignment_id} not found in lesson ${lesson_id}.`,
-      });
+      return res.json(
+        `Assignment with ID ${assignment_id} not found in lesson ${lesson_id}.`
+      );
     }
 
     // Delete all answers associated with the assignment

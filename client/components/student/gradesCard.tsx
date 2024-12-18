@@ -22,6 +22,8 @@ type TopCoursesProps = {
 
 const GradesCard: React.FC<TopCoursesProps> = ({ data }) => {
   const topCourses = React.useMemo(() => {
+    if (data.length === 0) return [];
+
     // Calculate average scores per course
     const courseScores = data.reduce<
       Record<string, { total: number; count: number }>
@@ -51,44 +53,44 @@ const GradesCard: React.FC<TopCoursesProps> = ({ data }) => {
   }, [data]);
 
   return (
-    <Card className="">
+    <Card>
       <CardHeader>
         <CardTitle className="text-[#1C1D1D]">Your Grades</CardTitle>
       </CardHeader>
       <CardContent className="mx-4">
-        {/* <div className="flex justify-between flex-col mb-2">
-          <div className="text-sm font-semibold">Linear Algebra</div>
-          <div className="flex justify-between mt-2">
-            <div className="text-blue-500 text-sm">Total</div>
-            <div className="text-sm text-primary">100/100</div>
-          </div>
-        </div>
-        <div className="flex justify-between flex-col">
-          <div className="text-sm font-semibold">Calculus</div>
-          <div className="flex justify-between mt-2">
-            <div className="text-blue-500 text-sm">Total</div>
-            <div className="text-sm text-primary">100/100</div>
-          </div>
-        </div> */}
-        {topCourses.map(({ course, averageScore }) => (
-          <div key={course} className="flex justify-between flex-col mb-2">
-            <div className="text-sm font-semibold">{course}</div>
-            <div className="flex justify-between mt-2">
-              <div className="text-blue-500 text-sm">Total</div>
-              <div className="text-sm text-primary">
-                {averageScore.toFixed(2)}/100
+        {topCourses.length > 0 ? (
+          topCourses.map(({ course, averageScore }) => (
+            <div key={course} className="flex justify-between flex-col mb-2">
+              <div className="text-sm font-semibold">{course}</div>
+              <div className="flex justify-between mt-2">
+                <div className="text-blue-500 text-sm">Total</div>
+                <div className="text-sm text-primary">
+                  {averageScore.toFixed(2)}/100
+                </div>
               </div>
             </div>
+          ))
+        ) : (
+          <div className="flex justify-between flex-col mb-2 gap-[9px]">
+            <br />
+            <br />
+            <div className="text-center text-sm text-gray-500">
+              You are not registered in any courses yet.
+            </div>
+            <br />
+            <br />
           </div>
-        ))}
+        )}
       </CardContent>
-      <CardFooter className="flex justify-center ">
-        <Link href={"/dashboard/student/assignments"} className="w-full">
-          <Button className="w-full text-primary bg-[#FFF5F0] text-sm shadow-none hover:text-white hover:bg-primary">
-            see more
-          </Button>
-        </Link>
-      </CardFooter>
+      {topCourses.length > 0 && (
+        <CardFooter className="flex justify-center">
+          <Link href="/dashboard/student/assignments" className="w-full">
+            <Button className="w-full text-primary bg-[#FFF5F0] text-sm shadow-none hover:text-white hover:bg-primary">
+              see more
+            </Button>
+          </Link>
+        </CardFooter>
+      )}
     </Card>
   );
 };

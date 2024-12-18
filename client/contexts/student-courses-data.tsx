@@ -13,12 +13,23 @@ export type StudentCourses = {
   completion_status?: boolean;
 };
 
+export type Student = {
+  address: string;
+  phone: string;
+  email: string;
+  username: string;
+  course: string;
+};
+
 type StudentCourseContext = {
   signupCourse: StudentCourses[];
   setSignupCourse: React.Dispatch<React.SetStateAction<StudentCourses[]>>;
   addStudentCourse: (data: StudentCourses) => void;
   deleteRegisteredCourse: (course_id: string) => boolean;
   getAllRegisteredCourses: () => void;
+  getStudentListPerTeacher: () => void;
+  registeredStudents: Student[];
+  setRegisteredStudents: React.Dispatch<React.SetStateAction<Student[]>>;
 };
 
 const StudentCourseContext = createContext<StudentCourseContext | null>(null);
@@ -27,6 +38,7 @@ export function StudentCourseContextProvider({
   children,
 }: StudentCourseContextProviderProps) {
   const [signupCourse, setSignupCourse] = useState<StudentCourses[]>([]);
+  const [registeredStudents, setRegisteredStudents] = useState<Student[]>([]);
 
   const getAllRegisteredCourses = () => {
     GlobalApi.getAllRegisteredCourses().then((resp: any) => {
@@ -51,6 +63,35 @@ export function StudentCourseContextProvider({
       return false;
     }
   };
+
+  const getStudentListPerTeacher = () => {
+    GlobalApi.getStudentListPerTeacher().then((resp: any) => {
+      const result: any = [];
+      resp.data.forEach(
+        (student: {
+          courses: any[];
+          user_id: any;
+          username: any;
+          address: any;
+          email: any;
+          phone: any;
+        }) => {
+          student.courses.forEach((course) => {
+            result.push({
+              user_id: student.user_id,
+              username: student.username,
+              address: student.address,
+              email: student.email,
+              phone: student.phone,
+              course: course,
+            });
+          });
+        }
+      );
+      setRegisteredStudents(result);
+    });
+  };
+
   return (
     <StudentCourseContext.Provider
       value={{
@@ -59,6 +100,9 @@ export function StudentCourseContextProvider({
         addStudentCourse,
         deleteRegisteredCourse,
         getAllRegisteredCourses,
+        getStudentListPerTeacher,
+        registeredStudents,
+        setRegisteredStudents,
       }}
     >
       {children}

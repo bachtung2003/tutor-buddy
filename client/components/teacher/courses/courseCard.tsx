@@ -10,6 +10,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
 import { BookOpen, Layers, Palette, Circle } from "lucide-react"; // Import icons
+import Image from "next/image";
+import defaultImage from "@/public/default-avatar.jpg";
 
 // Define the Courses type for the props
 type Courses = {
@@ -17,6 +19,7 @@ type Courses = {
   title: string;
   description: string;
   teacherName: string;
+  profile_picture: string;
 };
 
 const CourseCard: React.FC<Courses> = ({
@@ -24,6 +27,7 @@ const CourseCard: React.FC<Courses> = ({
   title,
   description,
   teacherName,
+  profile_picture,
 }) => {
   const [isDropdownOpen, setDropdownOpen] = useState(false);
   const [bgClass, setBgClass] = useState("blue"); // Set default background class
@@ -104,8 +108,14 @@ const CourseCard: React.FC<Courses> = ({
             </Button>
           </Link>
           <div className="text-sm text-gray-500 flex items-center gap-1">
-            <div className="inline-block w-6 h-6">
-              <Circle />
+            <div className="inline-block w-6 h-6 border rounded-full">
+              <Image
+                src={profile_picture ? profile_picture : defaultImage}
+                width={100}
+                height={100}
+                alt="teacher_picture"
+                className="rounded-full border"
+              ></Image>
             </div>
             {teacherName}
           </div>

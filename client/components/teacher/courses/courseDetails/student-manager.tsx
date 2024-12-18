@@ -1,5 +1,3 @@
-"use client";
-
 import * as React from "react";
 import {
   ColumnDef,
@@ -36,83 +34,18 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-const data: Learner[] = [
-  {
-    username: "Jane Doe",
-    id: "1",
-    phone: "(704) 555-0127",
-    status: "success",
-    email: "ken99@yahoo.com",
-    country: "United States",
-  },
-  {
-    username: "John Doe",
-    id: "2",
-    phone: "(704) 555-0127",
-    status: "success",
-    email: "Abe45@gmail.com",
-    country: "Brazil",
-  },
-  {
-    username: "Nuguri",
-    id: "3",
-    phone: "(704) 555-0127",
-    status: "processing",
-    email: "Monserrat44@gmail.com",
-    country: "United States",
-  },
-  {
-    username: "Jeanne",
-    id: "4",
-    phone: "(704) 555-0127",
-    status: "success",
-    email: "Silas22@gmail.com",
-    country: "Vietnam",
-  },
-  {
-    username: "Thorfinn",
-    id: "5",
-    phone: "(704) 555-0127",
-    status: "failed",
-    email: "carmella@hotmail.com",
-    country: "Cairo",
-  },
-];
-
-export type Learner = {
+export type Student = {
+  user_id: number;
   username: string;
-  id: string;
-  phone: string;
-  status: "pending" | "processing" | "success" | "failed";
+  address: string;
   email: string;
-  country: string;
+  phone: string;
+  fullname: string;
 };
 
-export const columns: ColumnDef<Learner>[] = [
-  // {
-  //   id: "select",
-  //   header: ({ table }) => (
-  //     <Checkbox
-  //       checked={
-  //         table.getIsAllPageRowsSelected() ||
-  //         (table.getIsSomePageRowsSelected() && "indeterminate")
-  //       }
-  //       onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-  //       aria-label="Select all"
-  //     />
-  //   ),
-  //   cell: ({ row }) => (
-  //     <Checkbox
-  //       checked={row.getIsSelected()}
-  //       onCheckedChange={(value) => row.toggleSelected(!!value)}
-  //       aria-label="Select row"
-  //     />
-  //   ),
-  //   enableSorting: false,
-  //   enableHiding: false,
-  // },
+export const columns: ColumnDef<Student>[] = [
   {
-    accessorKey: "id",
+    accessorKey: "user_id",
     header: ({ column }) => {
       return (
         <p
@@ -124,7 +57,7 @@ export const columns: ColumnDef<Learner>[] = [
         </p>
       );
     },
-    cell: ({ row }) => <div className="">{row.getValue("id")}</div>,
+    cell: ({ row }) => <div className="">{row.getValue("user_id")}</div>,
   },
   {
     accessorKey: "username",
@@ -134,10 +67,10 @@ export const columns: ColumnDef<Learner>[] = [
     ),
   },
   {
-    accessorKey: "status",
-    header: "Status",
+    accessorKey: "fullname",
+    header: "Full Name",
     cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("status")}</div>
+      <div className="capitalize">{row.getValue("fullname")}</div>
     ),
   },
   {
@@ -151,13 +84,13 @@ export const columns: ColumnDef<Learner>[] = [
     cell: ({ row }) => <div className="lowercase">{row.getValue("email")}</div>,
   },
   {
-    accessorKey: "country",
-    header: "Country",
-    cell: ({ row }) => <div>{row.getValue("country")}</div>,
+    accessorKey: "address",
+    header: "Address",
+    cell: ({ row }) => <div>{row.getValue("address")}</div>,
   },
 ];
 
-export default function DataTableDemo() {
+export default function DataTableDemo({ students }: { students: Student[] }) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -167,7 +100,7 @@ export default function DataTableDemo() {
   const [rowSelection, setRowSelection] = React.useState({});
 
   const table = useReactTable({
-    data,
+    data: students,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,

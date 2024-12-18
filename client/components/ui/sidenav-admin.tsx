@@ -10,6 +10,7 @@ import {
   X,
   Trophy,
   Rss,
+  User2,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -24,19 +25,19 @@ const SideNav = () => {
       id: 1,
       name: "Dashboard",
       icon: LayoutDashboard,
-      path: "/dashboard/student",
+      path: "/dashboard/admin",
     },
     {
       id: 2,
-      name: "My Courses",
-      icon: GraduationCap,
-      path: "/dashboard/student/courses",
+      name: "All Courses",
+      icon: BookOpenText,
+      path: "/dashboard/admin/courses",
     },
     {
       id: 3,
-      name: "Assignments",
-      icon: BookOpenText,
-      path: "/dashboard/student/assignments",
+      name: "All Users",
+      icon: User2,
+      path: "/dashboard/admin/users",
     },
   ];
 
@@ -68,11 +69,11 @@ const SideNav = () => {
   // Helper function to check if the path is active
   const isActive = (menuPath: string) => {
     // Ensure exact match for non-Dashboard routes
-    if (menuPath === "/dashboard/student") {
+    if (menuPath === "/dashboard/admin") {
       return pathname === menuPath;
     }
     // Highlight for child routes under specific menu items, excluding "Dashboard"
-    return pathname.startsWith(menuPath) && pathname !== "/dashboard/student";
+    return pathname.startsWith(menuPath) && pathname !== "/dashboard/admin";
   };
 
   return (

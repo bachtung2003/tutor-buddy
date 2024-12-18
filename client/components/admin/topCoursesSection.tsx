@@ -21,10 +21,16 @@ import Link from "next/link";
 
 // Define the Course type
 type Course = {
+  teacher_id: number;
   course_id: number;
   title: string;
   language: string;
   status: string;
+  Student?: Student[];
+};
+
+type Student = {
+  student_id: number;
 };
 
 interface TopCoursesSectionProps {
@@ -33,6 +39,17 @@ interface TopCoursesSectionProps {
 
 // Component definition
 const TopCoursesSection: React.FC<TopCoursesSectionProps> = ({ courses }) => {
+  // Sort courses by the number of students and pick the top 3
+  const topCourses = courses
+    .map((course) => ({
+      ...course,
+      studentCount: course.Student ? course.Student.length : 0, // Add student count as a property
+    }))
+    .sort((a, b) => b.studentCount - a.studentCount) // Sort by student count (descending)
+    .slice(0, 3); // Select the top 3 courses
+
+  console.log(topCourses);
+
   return (
     <Card>
       <CardHeader className="flex flex-col items-stretch space-y-0 border-b p-0 sm:flex-row">
@@ -52,7 +69,9 @@ const TopCoursesSection: React.FC<TopCoursesSectionProps> = ({ courses }) => {
             <TableRow>
               <TableHead>Title</TableHead>
               <TableHead>Language</TableHead>
-              <TableHead className="text-right">Status</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="text-center">Teacher ID</TableHead>
+              <TableHead className="text-center">Students</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -60,7 +79,13 @@ const TopCoursesSection: React.FC<TopCoursesSectionProps> = ({ courses }) => {
               <TableRow key={course.course_id}>
                 <TableCell>{course.title}</TableCell>
                 <TableCell>{course.language}</TableCell>
-                <TableCell className="text-right">{course.status}</TableCell>
+                <TableCell>{course.status}</TableCell>
+                <TableCell className="text-center">
+                  {course.teacher_id}
+                </TableCell>
+                <TableCell className="text-center">
+                  {course.Student?.length}
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>

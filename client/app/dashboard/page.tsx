@@ -21,6 +21,8 @@ const Dashboard = () => {
         router.replace("/dashboard/teacher");
       } else if (userRole.role === "student") {
         router.replace("/dashboard/student");
+      } else if (userRole.role === "admin") {
+        router.replace("/dashboard/admin");
       }
     } else {
       // If no role is found, redirect to login page

@@ -11,6 +11,17 @@ type UserData = {
   username: string;
   password: string;
   role: string;
+  email?: string;
+  phoneNumber?: string;
+  address?: string;
+};
+
+type UserUpdatedData = {
+  email: string;
+  phone: string;
+  address: string;
+  profile_picture: string;
+  fullname: string;
 };
 
 type CourseData = {
@@ -82,6 +93,18 @@ const loginUser = (data: UserData) =>
     return resp;
   });
 
+const deleteUser = (id: string) => apiInstance.delete(`/auth/${id}`);
+
+const getUserInfos = () => apiInstance.get("/auth");
+
+const getAllUsers = () => apiInstance.get("/auth/get-all");
+
+const updateUserInfos = (data: UserUpdatedData) =>
+  apiInstance.put("/auth", data);
+
+const getStudentListPerTeacher = () =>
+  apiInstance.get("/studentcourseupdate/get-all/students-list");
+
 //Courses
 const getAllCourse = () => apiInstance.get("/courseupdate");
 const addCourse = (data: CourseData) => apiInstance.post("/courseupdate", data);
@@ -93,6 +116,7 @@ const deleteCourse = (course_id: string) => {
   return apiInstance.delete(`/courseupdate/${course_id}`);
 };
 const getTopCourse = () => apiInstance.get("/courseupdate/sorted/top-3");
+const getAllTopCourse = () => apiInstance.get("/courseupdate/sorted/all/top-3");
 const getAllUnregisteredCourses = () =>
   apiInstance.get("/courseupdate/unregistered/all-courses");
 
@@ -102,6 +126,10 @@ const addStudentCourse = (data: StudentCourseData) =>
   apiInstance.post("/studentcourseupdate", data);
 const deleteRegisteredCourse = (course_id: string) =>
   apiInstance.delete(`/studentcourseupdate/${course_id}`);
+const getSingleCourseStudents = (course_id: string) =>
+  apiInstance.get(
+    `/studentcourseupdate/get-single-course/student-list/${course_id}`
+  );
 
 //Lessons
 const getLessons = () => apiInstance.get("/lessonupdate");
@@ -143,22 +171,29 @@ const addLessonScore = (data: Scores) =>
 const getCourseScore = (course_id: string) =>
   apiInstance.get(`/scoresupdate/${course_id}`);
 export default {
+  updateUserInfos,
   getAllClass,
   addClass,
   getClassDetails,
   getAllStudents,
   addStudent,
   getStudentDetails,
+  getStudentListPerTeacher,
   registerUser,
+  deleteUser,
   loginUser,
+  getUserInfos,
+  getAllUsers,
   addCourse,
   getAllCourse,
+  getAllTopCourse,
   getCourseDetails,
   updateCourse,
   deleteCourse,
   getTopCourse,
   getAllUnregisteredCourses,
   getAllRegisteredCourses,
+  getSingleCourseStudents,
   addStudentCourse,
   deleteRegisteredCourse,
   getLessons,

@@ -1,9 +1,10 @@
 const express = require("express");
 const router = express.Router();
-const { Student_Courses, Courses } = require("../models");
+const { Student_Courses, Courses, Users } = require("../models");
 const { validateToken } = require("../middlewares/AuthMiddleware");
+const { where } = require("sequelize");
 
-// Get all courses for the authenticated user
+// Get all courses for the authenticated user with addition information of teacher
 router.get("/", validateToken, async (req, res) => {
   try {
     const studentId = req.user.id; // Extract student ID from the authenticated user token
@@ -24,9 +25,26 @@ router.get("/", validateToken, async (req, res) => {
     // Step 2: Fetch course details from the Courses table
     const courses = await Courses.findAll({
       where: { course_id: courseIds },
+      include: [
+        {
+          model: Users,
+          as: "Teacher", // Ensure this matches the alias used in the association
+          attributes: ["username", "fullname", "profile_picture"], // Fetch only the username field
+        },
+      ],
     });
 
-    res.json(courses); // Send the array of courses to the client
+    // Map the results to include teacher.username at the top level of each course
+    const formattedCourses = courses.map((course) => {
+      return {
+        ...course.toJSON(),
+        teacher_username: course.Teacher?.username || null,
+        teacher_fullname: course.Teacher?.fullname || null,
+        teacher_profile_picture: course.Teacher?.profile_picture || null,
+      };
+    });
+
+    res.json(formattedCourses);
   } catch (error) {
     console.error("Error fetching registered courses:", error);
     res
@@ -158,5 +176,100 @@ router.get("/unregistered/all-courses", validateToken, async (req, res) => {
     res.status(500).json({ error: "An error occurred while fetching course" });
   }
 });
+
+router.get("/get-all/students-list", validateToken, async (req, res) => {
+  const userId = req.user.id;
+
+  try {
+    // Fetch courses taught by the teacher
+    const teacherCourses = await Courses.findAll({
+      where: { teacher_id: userId },
+      attributes: ["course_id", "title"],
+    });
+
+    // Extract course IDs
+    const courseIds = teacherCourses.map((course) => course.course_id);
+
+    // Fetch student-course mappings for the teacher's courses
+    const studentCourses = await Student_Courses.findAll({
+      where: { course_id: courseIds },
+      attributes: ["student_id", "course_id"],
+    });
+
+    // Extract student IDs
+    const studentIds = studentCourses.map((sc) => sc.student_id);
+
+    // Fetch student details and group by student
+    const students = await Users.findAll({
+      where: { user_id: studentIds },
+      attributes: ["user_id", "username", "address", "email", "phone"],
+    });
+
+    // Map course titles to student data
+    const courseMap = teacherCourses.reduce((acc, course) => {
+      acc[course.course_id] = course.title;
+      return acc;
+    }, {});
+
+    // Combine student details with their attended courses
+    const studentDetails = students.map((student) => {
+      const coursesAttended = studentCourses
+        .filter((sc) => sc.student_id === student.user_id)
+        .map((sc) => courseMap[sc.course_id]);
+
+      return {
+        ...student.get(), // Extract plain object
+        courses: coursesAttended,
+      };
+    });
+
+    res.json(studentDetails);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Server error");
+  }
+});
+
+router.get(
+  "/get-single-course/student-list/:course_id",
+  validateToken,
+  async (req, res) => {
+    const course_id = req.params.course_id;
+
+    try {
+      // Fetch student IDs associated with the course
+      const studentsId = await Student_Courses.findAll({
+        where: { course_id: course_id },
+        attributes: ["student_id"],
+      });
+
+      // Ensure studentsId is not empty or null
+      if (!studentsId || studentsId.length === 0) {
+        return res
+          .status(404)
+          .json({ message: "No students found for this course." });
+      }
+
+      // Retrieve student details
+      const studentIds = studentsId.map((item) => item.student_id); // Extract student_ids
+      const students = await Users.findAll({
+        where: { user_id: studentIds },
+        attributes: [
+          "user_id",
+          "username",
+          "address",
+          "email",
+          "phone",
+          "fullname",
+        ],
+      });
+      console.log(students);
+      res.json(students);
+    } catch (error) {
+      console.error(error);
+      res.status(500).send("Server error");
+    }
+  }
+);
 
 module.exports = router;

@@ -30,10 +30,13 @@ import { useLessonContext } from "@/contexts/lessons-data";
 
 const page = ({ params }: { params: { courseId: string } }) => {
   const { getCourseDetails, singleCourse, deleteCourse } = useCourseContext();
+  const [allStudents, getAllStudents] = useState(null);
   const { getAllLessonsList, lessons } = useLessonContext();
   useEffect(() => {
     getCourseDetails(params.courseId);
-
+    globalApi.getSingleCourseStudents(params.courseId).then((resp) => {
+      getAllStudents(resp.data);
+    });
     // Fetch courses on page load
     getAllLessonsList(params.courseId);
   }, []);
@@ -58,6 +61,10 @@ const page = ({ params }: { params: { courseId: string } }) => {
     return `${hoursStr}:${minutesStr}:${secondsStr}`;
   };
 
+  if (!allStudents) {
+    return <div>Loading...</div>; // Show a loading indicator while fetching data
+  }
+  console.log(allStudents);
   return (
     <div>
       {/* Header */}
@@ -199,7 +206,7 @@ const page = ({ params }: { params: { courseId: string } }) => {
         <section className="bg-gray-50 p-6 rounded-lg">
           <h2 className="text-lg font-semibold mb-4">Student Manager</h2>
           <div>
-            <DataTableDemo />
+            <DataTableDemo students={allStudents} />
           </div>
         </section>
       </main>

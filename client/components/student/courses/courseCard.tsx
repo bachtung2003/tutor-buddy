@@ -1,16 +1,11 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import Link from "next/link";
 import { BookOpen, Layers, Palette, Circle } from "lucide-react"; // Import icons
 import { getSession } from "@/utils/auth";
+import Image from "next/image";
+import defaultImage from "@/public/default-avatar.jpg";
 
 // Define the Courses type for the props
 type Courses = {
@@ -18,6 +13,7 @@ type Courses = {
   title: string;
   description: string;
   teacherName: string;
+  teacherProfile: string;
 };
 
 const CourseCard: React.FC<Courses> = ({
@@ -25,6 +21,7 @@ const CourseCard: React.FC<Courses> = ({
   title,
   description,
   teacherName,
+  teacherProfile,
 }) => {
   const [isDropdownOpen, setDropdownOpen] = useState(false);
   const [bgClass, setBgClass] = useState("blue"); // Set default background class
@@ -70,17 +67,6 @@ const CourseCard: React.FC<Courses> = ({
     setUser(session);
   }, []);
 
-  const handleDropdownToggle = () => {
-    setDropdownOpen(!isDropdownOpen);
-  };
-
-  const handleCheckProfile = () => {
-    console.log("Check author profile clicked");
-  };
-
-  const handleRemoveCourse = () => {
-    console.log("Remove course clicked");
-  };
   // Avoid rendering the username until we have user data
   if (!user) {
     return <div>Loading...</div>; // Optional: Loading state
@@ -112,33 +98,18 @@ const CourseCard: React.FC<Courses> = ({
             </Button>
           </Link>
           <div className="text-sm text-gray-500 flex items-center gap-1">
-            <div className="inline-block w-6 h-6">
-              <Circle />
+            <div className="inline-block w-7 h-7 border rounded-full">
+              <Image
+                src={teacherProfile ? teacherProfile : defaultImage}
+                width={100}
+                height={100}
+                alt="teacher_picture"
+                className="border rounded-full"
+              ></Image>
             </div>
-            {teacherName}
+            <div className="w-max">{teacherName}</div>
           </div>
         </div>
-
-        {/* Dropdown menu trigger */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <MoreHorizontal
-              className="text-gray-500 cursor-pointer"
-              onClick={handleDropdownToggle}
-            />
-          </DropdownMenuTrigger>
-
-          {isDropdownOpen && (
-            <DropdownMenuContent className="absolute right-0 mt-2 bg-white shadow-md border rounded-lg z-50 min-w-[11rem]">
-              <DropdownMenuItem onClick={handleCheckProfile}>
-                Edit course
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleRemoveCourse}>
-                Remove this course
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          )}
-        </DropdownMenu>
       </div>
     </div>
   );

@@ -19,5 +19,12 @@ module.exports = (sequelize, DataTypes) => {
     },
   });
 
+  Student_Courses.associate = (models) => {
+    Student_Courses.belongsTo(models.Courses, {
+      foreignKey: "course_id",
+      as: "Student",
+    });
+  };
+
   return Student_Courses;
 };

@@ -6,6 +6,10 @@ type CourseContextProviderProps = {
   children: React.ReactNode;
 };
 
+type Student = {
+  student_id: number;
+};
+
 export type Course = {
   course_id: number;
   title: string;
@@ -15,6 +19,10 @@ export type Course = {
   teacher_id: number;
   status: string;
   thumb_img: string;
+  teacher_username?: string;
+  teacher_fullname?: string;
+  teacher_profile_picture?: string;
+  Student?: Student[];
 };
 
 type CourseContext = {
@@ -34,6 +42,7 @@ type CourseContext = {
   getTopCourses: () => void;
   getAllUnregisteredCourses: () => void;
   getRegisteredCourses: () => void;
+  getAllTopCourses: () => void;
 };
 
 const CourseContext = createContext<CourseContext | null>(null);
@@ -83,6 +92,11 @@ export function CourseContextProvider({
       setTopCourses(resp.data);
     });
   };
+  const getAllTopCourses = () => {
+    GlobalApi.getAllTopCourse().then((resp: any) => {
+      setTopCourses(resp.data);
+    });
+  };
   const getAllUnregisteredCourses = () => {
     GlobalApi.getAllUnregisteredCourses().then((resp: any) => {
       setUnregisteredCourses(resp.data);
@@ -113,6 +127,7 @@ export function CourseContextProvider({
         getRegisteredCourses,
         unregisteredCourses,
         setUnregisteredCourses,
+        getAllTopCourses,
       }}
     >
       {children}

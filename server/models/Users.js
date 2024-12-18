@@ -9,11 +9,18 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    // email: {
-    //   type: DataTypes.STRING,
-    //   allowNull: false,
-    //   unique: true,
-    // },
+    fullname: {
+      type: DataTypes.STRING,
+    },
+    email: {
+      type: DataTypes.STRING,
+    },
+    phone: {
+      type: DataTypes.STRING,
+    },
+    address: {
+      type: DataTypes.STRING,
+    },
     password: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -22,9 +29,9 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.ENUM("admin", "teacher", "student"),
       allowNull: false,
     },
-    // profile_picture: {
-    //   type: DataTypes.STRING,
-    // },
+    profile_picture: {
+      type: DataTypes.STRING,
+    },
   });
 
   Users.associate = (models) => {

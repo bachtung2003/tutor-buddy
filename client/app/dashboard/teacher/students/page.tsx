@@ -6,36 +6,24 @@ import { useStudentContext } from "@/contexts/students-data";
 import { ring2 } from "ldrs";
 import { DataTable } from "@/components/ui/data-table";
 import { columns } from "./columns";
+import { useStudentCourseContext } from "@/contexts/student-courses-data";
 
 const Student = () => {
-  const { students, loading } = useStudentContext();
+  const { getStudentListPerTeacher, registeredStudents } =
+    useStudentCourseContext();
   useEffect(() => {
+    getStudentListPerTeacher();
     // This code will only run in the browser
     if (typeof window !== "undefined") {
       ring2.register();
     }
   }, []);
+  console.log(registeredStudents);
   return (
     <div className="p-7">
-      <div className="font-bold text-2xl flex justify-between items-center">
-        Student
-        <AddNewStudent />
-      </div>
-      <div className="flex mt-8 mb-4 ">Class Details</div>
-      {loading ? (
-        <div className="flex justify-center mt-8">
-          <l-ring-2
-            size="40"
-            stroke="5"
-            stroke-length="0.25"
-            bg-opacity="0.1"
-            speed="0.8"
-            color="black"
-          ></l-ring-2>
-        </div>
-      ) : (
-        <DataTable columns={columns} data={students} />
-      )}
+      <div className="flex mt-8 mb-4 ">Student Details</div>
+
+      <DataTable columns={columns} data={registeredStudents} />
     </div>
   );
 };

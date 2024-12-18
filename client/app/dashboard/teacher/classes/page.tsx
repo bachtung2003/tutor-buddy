@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useCourseContext } from "@/contexts/courses-data";
+import globalApi from "@/services/globalApi";
 
 const ITEMS_PER_PAGE = 6; // Number of courses per page
 
@@ -19,10 +20,14 @@ const Page = () => {
   const { courses, loading, getAllCoursesList } = useCourseContext();
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(6);
+  const [user, setUser] = useState<any>(null); // Hold user data in state
 
   useEffect(() => {
     // Fetch courses on page load
     getAllCoursesList();
+    globalApi.getUserInfos().then((resp) => {
+      setUser(resp.data);
+    });
   }, []);
 
   // Calculate the total number of pages
@@ -39,7 +44,7 @@ const Page = () => {
     setCurrentPage(newPage);
   };
 
-  if (loading) {
+  if (!user) {
     return <div>Loading...</div>; // Show a loading indicator while fetching data
   }
 
@@ -65,7 +70,8 @@ const Page = () => {
             id={course.course_id.toString()}
             title={course.title}
             description={course.objective}
-            teacherName="Tung" // Static teacher name
+            teacherName={user.fullname} // Static teacher name
+            profile_picture={user.profile_picture}
           />
         ))}
       </div>

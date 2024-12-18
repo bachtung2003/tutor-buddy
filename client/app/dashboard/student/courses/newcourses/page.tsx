@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/select";
 import Link from "next/link";
 import { useCourseContext } from "@/contexts/courses-data";
+import globalApi from "@/services/globalApi";
 
 const Page = () => {
   const { getAllUnregisteredCourses, unregisteredCourses } = useCourseContext();
@@ -23,7 +24,10 @@ const Page = () => {
   useEffect(() => {
     getAllUnregisteredCourses();
   }, []);
-
+  console.log(unregisteredCourses);
+  if (!unregisteredCourses) {
+    return <div>Loading...</div>; // Show a loading indicator while fetching data
+  }
   // Get the courses to display on the current page
   const getPaginatedCourses = () => {
     const startIndex = (currentPage - 1) * pageSize;
@@ -64,7 +68,12 @@ const Page = () => {
             id={course.course_id.toString()}
             title={course.title}
             description={course.objective}
-            teacherName="Tung" // Static teacher name
+            teacherName={course.teacher_fullname ? course.teacher_fullname : ""}
+            teacherProfile={
+              course.teacher_profile_picture
+                ? course.teacher_profile_picture
+                : ""
+            }
           />
         ))}
       </div>

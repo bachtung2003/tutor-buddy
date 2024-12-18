@@ -6,6 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Lesson, useLessonContext } from "@/contexts/lessons-data";
 import { useAssignmentContext } from "@/contexts/assignment-data";
 import axios from "axios";
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"; // Import Dialog components
 
 interface FormData {
   title: string;
@@ -44,6 +51,7 @@ const page = () => {
     questions: [],
     duration: 0,
   });
+  const [isDialogOpen, setDialogOpen] = useState(false); // State for dialog visibility
 
   const handleQuestionChange = (id: number, value: string) => {
     setForm((prevForm) => ({
@@ -281,6 +289,13 @@ const page = () => {
 
     console.log("Assignments:", assignmentData);
     addAssignment(assignmentData); // Ensure addAssignment supports arrays
+
+    // Show success dialog and redirect after a delay
+    setDialogOpen(true);
+    setTimeout(() => {
+      setDialogOpen(false);
+      router.back();
+    }, 3000); // Redirect after 3 seconds
   };
 
   return (
@@ -433,12 +448,6 @@ const page = () => {
           <Button type="submit" className="bg-primary text-white">
             Save
           </Button>
-          <Button
-            type="submit"
-            className="bg-white border text-black hover:bg-gray-200"
-          >
-            Save Draft
-          </Button>
         </div>
 
         {/* Footer Text */}
@@ -447,6 +456,20 @@ const page = () => {
           TutorBuddy Admin Team
         </p>
       </form>
+      {/* Success Dialog */}
+      <Dialog open={isDialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Success!</DialogTitle>
+          </DialogHeader>
+          <div className="text-center">
+            <p className="text-lg font-medium">Lesson successfully added!</p>
+            <p className="text-sm text-gray-600">
+              Redirecting to the previous page...
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

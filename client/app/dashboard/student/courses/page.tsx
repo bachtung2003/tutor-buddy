@@ -18,7 +18,10 @@ const Page = () => {
   useEffect(() => {
     getRegisteredCourses();
   }, []);
-
+  if (!courses) {
+    return <div>Loading...</div>; // Show a loading indicator while fetching data
+  }
+  console.log(courses);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(6);
   // Calculate the total number of pages
@@ -59,7 +62,12 @@ const Page = () => {
             id={course.course_id.toString()}
             title={course.title}
             description={course.objective}
-            teacherName="Tung" // Static teacher name
+            teacherName={course.teacher_fullname ? course.teacher_fullname : ""}
+            teacherProfile={
+              course.teacher_profile_picture
+                ? course.teacher_profile_picture
+                : ""
+            }
           />
         ))}
       </div>
