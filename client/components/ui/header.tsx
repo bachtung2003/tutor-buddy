@@ -58,11 +58,17 @@ const Header = () => {
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem
-              onClick={() => router.push(`/dashboard/${user?.role}/profile`)}
-            >
-              Account Details
-            </DropdownMenuItem>
+            {user?.role !== "admin" ? (
+              <DropdownMenuItem
+                onClick={() => router.push(`/dashboard/${user?.role}/profile`)}
+              >
+                Account Details
+              </DropdownMenuItem>
+            ) : (
+              <DropdownMenuItem disabled className="cursor-not-allowed">
+                Account Details
+              </DropdownMenuItem>
+            )}
             <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

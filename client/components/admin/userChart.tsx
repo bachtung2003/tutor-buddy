@@ -76,6 +76,7 @@ const UserChart: React.FC<{ data: { role: "teacher" | "student" }[] }> = ({
       <CardContent>
         <ChartContainer config={chartConfig}>
           <BarChart
+            barSize={300}
             height={60}
             accessibilityLayer
             data={roleCounts}
@@ -100,7 +101,12 @@ const UserChart: React.FC<{ data: { role: "teacher" | "student" }[] }> = ({
               cursor={false}
               content={<ChartTooltipContent hideLabel />}
             />
-            <Bar dataKey="quantity" layout="vertical" radius={5} height={30} />
+            <Bar
+              dataKey="quantity"
+              layout="vertical"
+              radius={5}
+              barSize={150}
+            />
           </BarChart>
         </ChartContainer>
       </CardContent>

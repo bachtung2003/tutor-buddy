@@ -94,7 +94,6 @@ const AllCoursesSection: React.FC<TopCoursesSectionProps> = ({ courses }) => {
               <TableHead>Title</TableHead>
               <TableHead>Language</TableHead>
               <TableHead className="text-center">Teacher ID</TableHead>
-              <TableHead className="text-center">Students</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -111,9 +110,6 @@ const AllCoursesSection: React.FC<TopCoursesSectionProps> = ({ courses }) => {
                 <TableCell>{course.language}</TableCell>
                 <TableCell className="text-center">
                   {course.teacher_id}
-                </TableCell>
-                <TableCell className="text-center">
-                  {course.Student?.length}
                 </TableCell>
               </TableRow>
             ))}
