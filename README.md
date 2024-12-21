@@ -61,13 +61,13 @@ TutorBuddy
 └── docker-compose.yml       # Docker container orchestration
 ```
 
-## Installation
+## Deployment
 
 1. Clone the repository
 
 2. Navigate to the project directory
 
-4. Create a `.env` file for environment variables in `client` directories:
+3. Create a `.env` file for environment variables in `client` directories:
    ```env
    API_BASE_URL=http://host.docker.internal:8080
    NODE_ENV=development
@@ -75,22 +75,10 @@ TutorBuddy
    NEXT_PUBLIC_YOUTUBE_API_KEY="Create your own Youtube API key and put it here"
    ```
 
-5. Start the development servers:
+4. Start the project:
    ```bash
-   # For the client
-   cd client && npm run dev
-
-   # For the server
-   cd server && npm run start
+   docker-compose up --build
    ```
-
-## Deployment
-
-The project is Dockerized for consistent deployment. Use the following command to build and run the application:
-
-```bash
-docker-compose up --build
-```
 
 ## Future Enhancements
 
