@@ -12,7 +12,8 @@ services:
     environment:
       - API_BASE_URL=http://server:8080
     volumes:
-      - ./client:/app # Mount the local client folder for live updates
+      - ./client:/app
+      - client_node_modules:/app/node_modules
 
   server:
     build:
@@ -28,7 +29,8 @@ services:
     depends_on:
       - mysql
     volumes:
-      - ./server:/app # Mount the local server folder for live updates
+      - ./server:/app
+      - server_node_modules:/app/node_modules
 
   mysql:
     image: mysql:8.0
@@ -42,3 +44,5 @@ services:
 
 volumes:
   mysql-data:
+  client_node_modules:
+  server_node_modules:

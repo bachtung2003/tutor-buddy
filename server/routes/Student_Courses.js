@@ -245,9 +245,7 @@ router.get(
 
       // Ensure studentsId is not empty or null
       if (!studentsId || studentsId.length === 0) {
-        return res
-          .status(404)
-          .json({ message: "No students found for this course." });
+        return res.json({ message: "No students found for this course." });
       }
 
       // Retrieve student details

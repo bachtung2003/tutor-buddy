@@ -30,7 +30,7 @@ import { useLessonContext } from "@/contexts/lessons-data";
 
 const page = ({ params }: { params: { courseId: string } }) => {
   const { getCourseDetails, singleCourse, deleteCourse } = useCourseContext();
-  const [allStudents, getAllStudents] = useState(null);
+  const [allStudents, getAllStudents] = useState([]);
   const { getAllLessonsList, lessons } = useLessonContext();
   useEffect(() => {
     getCourseDetails(params.courseId);
@@ -61,9 +61,6 @@ const page = ({ params }: { params: { courseId: string } }) => {
     return `${hoursStr}:${minutesStr}:${secondsStr}`;
   };
 
-  if (!allStudents) {
-    return <div>Loading...</div>; // Show a loading indicator while fetching data
-  }
   console.log(allStudents);
   return (
     <div>
